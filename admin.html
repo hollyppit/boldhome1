@@ -265,11 +265,18 @@
 
       <div class="type-help">
         <b>타입 가이드</b> &nbsp;
-        <b>hero</b>: 상단 메인 ·
+        <b>hero</b>: 상단 메인 (+items가 슬라이드) ·
         <b>text</b>: 본문 텍스트만 ·
         <b>image_text</b>: 좌 이미지 + 우 텍스트 ·
         <b>gallery</b>: 카드 그리드(아이템 필요) ·
-        <b>cta</b>: 검은 배경 행동 유도 박스
+        <b>cta</b>: 진한 배경 행동 유도 박스
+      </div>
+
+      <!-- 공개 사이트 현재 상태 미니 배너 -->
+      <div id="pubStateBanner" style="margin-top:14px; padding:12px 16px; border-radius:8px; font-size:12px; display:none; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span id="pubStateIcon">⚡</span>
+        <span id="pubStateText"></span>
+        <a href="index.html" target="_blank" style="margin-left:auto; color:var(--accent); font-weight:700; text-decoration:underline;">공개 사이트 열기 ↗</a>
       </div>
 
       <div id="sectionList" style="margin-top:16px;"></div>
@@ -498,6 +505,91 @@ $('#btnSaveSettings').onclick = async () => {
   toast('저장 완료');
 };
 
+// ================== 샘플 콘텐츠 DB 설치 ==================
+async function installSampleData() {
+  const ok = confirm('샘플 콘텐츠를 DB에 설치합니다.\n\n※ 기존 섹션/아이템이 있다면 모두 삭제되고 샘플로 교체됩니다.\n진행하시겠습니까?');
+  if (!ok) return;
+  const btn = $('#btnInstallSample');
+  if (btn) { btn.disabled = true; btn.textContent = '설치 중...'; }
+  try {
+    // 1) 기존 데이터 초기화
+    await supabase.from('items').delete().not('id','is',null);
+    await supabase.from('sections').delete().not('id','is',null);
+
+    // 2) HERO + 슬라이드 3장
+    const { data: hero, error: e1 } = await supabase.from('sections').insert({
+      slug:'hero', type:'hero',
+      title:'BOLD', subtitle:'PORTFOLIO',
+      body:'대담한 시선으로 이야기를 풀어냅니다.\n기획과 실행 사이, 그 균형점에서 태어난 스튜디오.',
+      link_label:'WORKS 보기', link_url:'#works', sort_order:1
+    }).select().single();
+    if (e1) throw e1;
+    await supabase.from('items').insert([
+      { section_id:hero.id, title:'Campaign 01', subtitle:'BRAND IDENTITY',
+        image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1600&q=80', sort_order:1 },
+      { section_id:hero.id, title:'Editorial 02', subtitle:'ART DIRECTION',
+        image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&q=80', sort_order:2 },
+      { section_id:hero.id, title:'Poster 03', subtitle:'GRAPHIC DESIGN',
+        image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1600&q=80', sort_order:3 },
+    ]);
+
+    // 3) ABOUT
+    await supabase.from('sections').insert({
+      slug:'about', type:'text',
+      title:'ABOUT', subtitle:'브랜드 소개',
+      body:'BOLD는 전주에 기반을 둔 창작 스튜디오입니다.\n\n이야기와 이미지, 태도가 만나는 지점에서 브랜드를 설계합니다. 크기가 아닌 밀도로 승부하며, 한 번의 좋은 선택이 열 개의 평범함을 이긴다고 믿습니다.',
+      sort_order:2
+    });
+
+    // 4) WORKS + 갤러리 6개
+    const { data: works, error: e2 } = await supabase.from('sections').insert({
+      slug:'works', type:'gallery',
+      title:'WORKS', subtitle:'포트폴리오',
+      body:'최근 진행한 프로젝트들입니다. 썸네일을 클릭하면 상세로 이동합니다.',
+      sort_order:3
+    }).select().single();
+    if (e2) throw e2;
+    await supabase.from('items').insert([
+      { section_id:works.id, title:'Project 01', subtitle:'Brand Identity', tag:'NEW',
+        image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80', link_url:'#', sort_order:1 },
+      { section_id:works.id, title:'Project 02', subtitle:'Editorial',
+        image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80', link_url:'#', sort_order:2 },
+      { section_id:works.id, title:'Project 03', subtitle:'Campaign',
+        image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80', link_url:'#', sort_order:3 },
+      { section_id:works.id, title:'Project 04', subtitle:'Art Direction',
+        image_url:'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=800&q=80', link_url:'#', sort_order:4 },
+      { section_id:works.id, title:'Project 05', subtitle:'Poster', tag:'HOT',
+        image_url:'https://images.unsplash.com/photo-1534551767192-78b8dd45b51b?w=800&q=80', link_url:'#', sort_order:5 },
+      { section_id:works.id, title:'Project 06', subtitle:'Packaging',
+        image_url:'https://images.unsplash.com/photo-1561070791-2526d30994b8?w=800&q=80', link_url:'#', sort_order:6 },
+    ]);
+
+    // 5) PHILOSOPHY
+    await supabase.from('sections').insert({
+      slug:'philosophy', type:'image_text',
+      title:'PHILOSOPHY',
+      body:'우리의 작업은 장식이 아닌 전략에서 시작합니다.\n\n간결하지만 결코 비어있지 않은, 대담하지만 결코 무례하지 않은 균형을 추구합니다. 브랜드의 본질을 찾고, 그것을 오래 남을 형태로 번역합니다.',
+      image_url:'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=1200&q=80',
+      sort_order:4
+    });
+
+    // 6) CONTACT
+    await supabase.from('sections').insert({
+      slug:'contact', type:'cta',
+      title:'CONTACT', subtitle:'함께 만들어요',
+      body:'새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
+      link_label:'이메일 보내기', link_url:'mailto:hello@bold.kr',
+      sort_order:5
+    });
+
+    toast('샘플 콘텐츠 설치 완료 ✓');
+    await loadSections();
+  } catch (e) {
+    toast('설치 실패: ' + (e.message || e), 'err');
+    if (btn) { btn.disabled = false; btn.textContent = '📦 샘플 콘텐츠를 DB에 심기'; }
+  }
+}
+
 // ================== 섹션 목록 ==================
 let SECTIONS_CACHE = [];
 async function loadSections() {
@@ -509,8 +601,53 @@ async function loadSections() {
 }
 function renderSectionList() {
   const list = $('#sectionList');
+  // 공개 사이트 현재 상태 미니 배너 갱신
+  const banner = $('#pubStateBanner');
+  const icon = $('#pubStateIcon');
+  const txt = $('#pubStateText');
+  if (banner) {
+    banner.style.display = 'flex';
+    if (!SECTIONS_CACHE.length) {
+      banner.style.background = '#3a1d10';
+      banner.style.border = '1px solid var(--accent)';
+      icon.textContent = '📦';
+      txt.innerHTML = '<b style="color:var(--accent);">공개 사이트는 코드 내장 샘플</b>로 보이고 있습니다 — 아직 DB에 섹션 0개';
+    } else {
+      banner.style.background = '#10281a';
+      banner.style.border = '1px solid #2dd26a';
+      icon.textContent = '✅';
+      const typeSummary = SECTIONS_CACHE.map(s => s.type).join(' → ');
+      txt.innerHTML = `<b style="color:#2dd26a;">DB 섹션 ${SECTIONS_CACHE.length}개</b>로 공개 사이트 표시 중 · <span style="color:var(--muted);">${esc(typeSummary)}</span>`;
+    }
+  }
   if (!SECTIONS_CACHE.length) {
-    list.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">섹션이 없습니다. 오른쪽 위 "＋ 새 섹션" 을 눌러 추가하세요.</div>`;
+    list.innerHTML = `
+      <div class="card" style="border:1px dashed var(--accent); padding:36px 28px; text-align:center; background:#1b1b20;">
+        <div style="font-family:var(--mono); font-weight:900; font-size:14px; letter-spacing:.18em; color:var(--accent); margin-bottom:16px;">
+          📦 DB에 섹션이 없습니다
+        </div>
+        <div style="color:var(--fg); font-size:14px; line-height:1.85; max-width:560px; margin:0 auto 24px;">
+          공개 사이트(<a href="index.html" target="_blank" style="color:var(--accent); text-decoration:underline;">새 창에서 열기 ↗</a>)는 지금 <b style="color:var(--accent);">코드 내장 샘플 콘텐츠</b>로 보이고 있어요.<br>
+          <span style="color:var(--muted); font-size:12px;">(Hero 슬라이드 3장 + About + Works 6개 + Philosophy + Contact)</span>
+        </div>
+        <div style="color:var(--muted); font-size:13px; line-height:1.8; max-width:560px; margin:0 auto 22px;">
+          👉 아래 버튼을 누르면 그 샘플 데이터가 그대로 DB에 복사되고,<br>
+          이 화면에서 각 섹션/이미지를 <b style="color:var(--fg);">내 콘텐츠로 교체</b>할 수 있어요.
+        </div>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn btn-accent" id="btnInstallSample" style="padding:14px 28px; font-size:13px;">
+            📦 샘플 콘텐츠를 DB에 심기
+          </button>
+          <button class="btn" id="btnEmptyNewSection" style="padding:14px 28px; font-size:13px;">
+            ＋ 빈 섹션부터 시작
+          </button>
+        </div>
+        <p style="font-size:11px; color:var(--muted); margin:20px 0 0;">
+          ※ 버튼 클릭 후 공개 사이트 새로고침 시 상단 주황 "샘플" 배너가 사라지면 성공입니다.
+        </p>
+      </div>`;
+    $('#btnInstallSample').onclick = installSampleData;
+    $('#btnEmptyNewSection').onclick = () => openSectionModal(null);
     return;
   }
   list.innerHTML = SECTIONS_CACHE.map(s => `
