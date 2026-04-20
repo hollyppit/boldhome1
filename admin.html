@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BOLD · 관리자</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#0f0f10; --panel:#17171a; --panel2:#1f1f23; --line:#2a2a30;
+    --fg:#f4f4f5; --muted:#8a8a92; --accent:#ff3b30; --ok:#2dd26a;
+    --sans:'Noto Sans KR','Archivo',sans-serif; --mono:'Archivo',sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:var(--sans); }
+  a{ color:inherit; }
+  button{ font-family:inherit; cursor:pointer; }
+  input, textarea, select {
+    width:100%; padding:10px 12px; background:var(--panel2); border:1px solid var(--line);
+    color:var(--fg); border-radius:6px; font-family:inherit; font-size:13px;
+  }
+  input:focus, textarea:focus, select:focus { outline:0; border-color:#555; }
+  textarea { min-height: 88px; resize: vertical; line-height:1.5; }
+  label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin: 10px 0 6px; font-family:var(--mono); font-weight:600; }
+  .btn {
+    padding: 9px 16px; border:1px solid var(--line); background:var(--panel2); color:var(--fg);
+    border-radius:6px; font-size:12px; letter-spacing:.08em; font-family:var(--mono); font-weight:600;
+    display:inline-flex; align-items:center; gap:6px; transition:.15s;
+  }
+  .btn:hover { border-color:#666; }
+  .btn-primary { background:var(--fg); color:#000; border-color:var(--fg); }
+  .btn-primary:hover { background:#fff; }
+  .btn-accent { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .btn-ghost { background:transparent; }
+  .btn-danger { color:#ff8b85; border-color:#552; }
+  .btn-danger:hover { background:#3a1212; border-color:#d33; color:#fff; }
+
+  /* 레이아웃 */
+  .shell { display:grid; grid-template-columns: 240px 1fr; min-height:100vh; }
+  .sidebar {
+    background:#0a0a0c; border-right:1px solid var(--line);
+    padding: 24px 18px; display:flex; flex-direction:column; gap:6px;
+  }
+  .brand { font-family:var(--mono); font-weight:900; letter-spacing:.25em; font-size:20px; margin-bottom:22px; }
+  .sidebar .brand small { display:block; font-size:10px; color:var(--muted); letter-spacing:.2em; font-weight:500; margin-top:4px; }
+  .side-link {
+    padding: 10px 12px; border-radius:6px; font-size:13px; color:var(--muted);
+    display:flex; align-items:center; gap:10px; transition:.15s;
+    text-decoration:none;
+  }
+  .side-link:hover { background:#15151a; color:var(--fg); }
+  .side-link.active { background:#1e1e24; color:var(--fg); }
+  .side-link .dot { width:5px; height:5px; border-radius:50%; background:var(--accent); opacity:0; }
+  .side-link.active .dot { opacity:1; }
+  .side-spacer { flex:1; }
+  .side-foot { font-size:11px; color:var(--muted); padding: 12px; border-top:1px solid var(--line); margin-top:8px; }
+  .side-foot a { color:var(--accent); }
+
+  main { padding: 28px 36px 80px; max-width: 1100px; }
+  h1 { font-family:var(--mono); font-weight:900; letter-spacing:-.01em; margin: 4px 0 4px; font-size: 28px; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom: 28px; }
+  .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+  .grid-3 { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
+  .card {
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding: 20px; margin-bottom:16px;
+  }
+  .card h3 { margin: 0 0 14px; font-family:var(--mono); font-weight:700; letter-spacing:.08em; font-size:13px; text-transform:uppercase; color:var(--muted); }
+
+  /* 섹션 리스트 */
+  .section-row {
+    display:grid; grid-template-columns: 40px 110px 1fr 1fr auto auto auto;
+    align-items:center; gap:12px;
+    padding: 12px 14px; background: var(--panel2); border:1px solid var(--line);
+    border-radius:8px; margin-bottom:8px;
+    font-size:13px;
+  }
+  .section-row .handle { cursor:grab; color:var(--muted); font-family:var(--mono); font-size:12px; }
+  .section-row.dragging { opacity:.4; }
+  .chip { display:inline-block; padding: 2px 8px; border-radius:10px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
+  .chip.hero{ background:#3a1212; color:#ff8b85; }
+  .chip.text{ background:#123a1e; color:#8bff8b; }
+  .chip.image_text{ background:#12283a; color:#8bbfff; }
+  .chip.gallery{ background:#3a2b12; color:#ffbf8b; }
+  .chip.cta{ background:#2a123a; color:#d68bff; }
+  .chip.off{ background:#333; color:#888; }
+
+  /* 아이템 리스트 */
+  .item-row {
+    display:grid; grid-template-columns: 40px 60px 1fr 1fr auto auto;
+    align-items:center; gap:10px;
+    padding: 8px 10px; background:#141418; border:1px solid var(--line);
+    border-radius:6px; margin-bottom:6px; font-size:12px;
+  }
+  .item-row .handle { cursor:grab; color:var(--muted); font-size:11px; }
+  .item-row img { width:50px; height:50px; object-fit:cover; border-radius:4px; background:#222; }
+
+  /* 모달 */
+  .modal-bg {
+    position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:100;
+    display:none; align-items:flex-start; justify-content:center; padding: 40px 20px;
+    overflow-y:auto;
+  }
+  .modal-bg.open { display:flex; }
+  .modal {
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; padding: 26px; width:100%; max-width: 720px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.6);
+  }
+  .modal h2 { margin: 0 0 18px; font-family:var(--mono); font-size:18px; letter-spacing:.05em; }
+  .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; padding-top:18px; border-top:1px solid var(--line); }
+
+  /* 로그인 */
+  .login-shell {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 30% 20%, #1a1a22 0%, #0a0a0c 60%);
+  }
+  .login-box {
+    width:100%; max-width: 400px; background:var(--panel);
+    border:1px solid var(--line); border-radius:12px; padding: 36px 32px;
+  }
+  .login-box .brand { margin-bottom:6px; }
+  .login-box .sub { margin-bottom:24px; }
+
+  /* 토스트 */
+  #toast {
+    position:fixed; bottom:20px; right:20px; background:#111; border:1px solid var(--line);
+    padding: 12px 16px; border-radius:8px; font-size:13px; display:none; z-index:999;
+  }
+  #toast.ok { border-color:var(--ok); color:var(--ok); }
+  #toast.err { border-color:var(--accent); color:#ff8b85; }
+
+  .thumb { width:100%; aspect-ratio: 4/3; background:#222 center/cover no-repeat; border-radius:6px; border:1px dashed var(--line); }
+  .hidden { display:none !important; }
+
+  .type-help {
+    background:#111; border-left:2px solid var(--accent);
+    padding: 8px 12px; font-size:11px; color:var(--muted); line-height:1.6;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .icon-action {
+    width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center;
+    background:transparent; border:1px solid transparent; border-radius:6px; color:var(--muted);
+  }
+  .icon-action:hover { border-color:var(--line); color:var(--fg); }
+  .icon-action svg { width:15px; height:15px; }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { flex-direction:row; overflow-x:auto; padding: 12px; border-right:0; border-bottom:1px solid var(--line); }
+    .sidebar .brand, .side-spacer, .side-foot { display:none; }
+    .side-link { white-space:nowrap; }
+    .section-row, .item-row { grid-template-columns: 1fr auto; gap:6px; }
+    .section-row > :nth-child(n+3):nth-child(-n+4),
+    .item-row > :nth-child(n+3):nth-child(-n+4) { grid-column: 1 / -1; }
+    main { padding: 20px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== 로그인 화면 ==================== -->
+<div id="loginShell" class="login-shell">
+  <div class="login-box">
+    <div class="brand">BOLD<small>ADMIN</small></div>
+    <p class="sub">사이트 콘텐츠를 관리합니다.</p>
+    <label>이메일</label>
+    <input type="email" id="loginEmail" placeholder="admin@example.com" />
+    <label>비밀번호</label>
+    <input type="password" id="loginPassword" placeholder="••••••••" />
+    <div style="display:flex; gap:8px; margin-top:16px;">
+      <button class="btn btn-primary" id="btnLogin" style="flex:1;">로그인</button>
+    </div>
+    <p style="margin-top:16px; font-size:11px; color:var(--muted); line-height:1.7;">
+      최초 1회: Supabase Dashboard → <b>Authentication → Users</b> 에서 관리자 계정을 생성하세요.<br>
+      (Email Provider · Auto-confirm 권장)
+    </p>
+    <p style="margin-top:8px; font-size:11px;">
+      <a href="index.html" style="color:var(--muted);">← 사이트로 돌아가기</a>
+    </p>
+  </div>
+</div>
+
+<!-- ==================== 관리자 메인 ==================== -->
+<div id="adminShell" class="shell hidden">
+  <aside class="sidebar">
+    <div class="brand">BOLD<small>ADMIN PANEL</small></div>
+    <a href="#" class="side-link active" data-tab="settings">
+      <span class="dot"></span> 사이트 설정
+    </a>
+    <a href="#" class="side-link" data-tab="sections">
+      <span class="dot"></span> 섹션 관리
+    </a>
+    <a href="#" class="side-link" data-tab="export">
+      <span class="dot"></span> 내보내기 / 가져오기
+    </a>
+    <div class="side-spacer"></div>
+    <div class="side-foot">
+      <div id="userEmail">—</div>
+      <div style="margin-top:8px; display:flex; gap:6px;">
+        <a href="index.html" target="_blank">사이트 보기</a>
+        <span style="color:var(--line)">·</span>
+        <a href="#" id="btnLogout" style="color:var(--accent);">로그아웃</a>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- =============== 탭: 사이트 설정 =============== -->
+    <div class="tab" data-tab="settings">
+      <h1>사이트 설정</h1>
+      <p class="sub">로고, 연락처, SEO, 색상 등 전역 설정</p>
+
+      <div class="card">
+        <h3>브랜드</h3>
+        <div class="grid-2">
+          <div><label>사이트명 (타이틀바)</label><input id="f_site_name" /></div>
+          <div><label>로고 텍스트 (헤더 표기)</label><input id="f_site_tagline" /></div>
+        </div>
+        <label>로고 이미지 URL (선택, 있으면 텍스트 대신 이미지 표기)</label>
+        <input id="f_logo_url" placeholder="https://..." />
+        <label>SEO 설명 (meta description)</label>
+        <textarea id="f_seo_description"></textarea>
+      </div>
+
+      <div class="card">
+        <h3>연락처 & 소셜</h3>
+        <div class="grid-3">
+          <div><label>이메일</label><input id="f_contact_email" /></div>
+          <div><label>전화</label><input id="f_contact_phone" /></div>
+          <div><label>주소</label><input id="f_contact_address" /></div>
+        </div>
+        <div class="grid-3" style="margin-top:6px;">
+          <div><label>Instagram URL</label><input id="f_social_instagram" /></div>
+          <div><label>YouTube URL</label><input id="f_social_youtube" /></div>
+          <div><label>Facebook URL</label><input id="f_social_facebook" /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>푸터 & 테마</h3>
+        <label>푸터 카피라이트</label>
+        <input id="f_footer_text" />
+        <div class="grid-2" style="margin-top:6px;">
+          <div><label>메인 컬러 (fg)</label><input id="f_theme_primary_color" type="text" placeholder="#0a0a0a" /></div>
+          <div><label>포인트 컬러 (accent)</label><input id="f_theme_accent_color" type="text" placeholder="#ff3b30" /></div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn" id="btnReloadSettings">다시 불러오기</button>
+        <button class="btn btn-primary" id="btnSaveSettings">저장</button>
+      </div>
+    </div>
+
+    <!-- =============== 탭: 섹션 관리 =============== -->
+    <div class="tab hidden" data-tab="sections">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <div>
+          <h1>섹션 관리</h1>
+          <p class="sub">드래그로 순서 변경. 섹션 클릭 시 내부 아이템(갤러리 카드 등) 수정.</p>
+        </div>
+        <button class="btn btn-accent" id="btnNewSection">＋ 새 섹션</button>
+      </div>
+
+      <div class="type-help">
+        <b>타입 가이드</b> &nbsp;
+        <b>hero</b>: 상단 메인 ·
+        <b>text</b>: 본문 텍스트만 ·
+        <b>image_text</b>: 좌 이미지 + 우 텍스트 ·
+        <b>gallery</b>: 카드 그리드(아이템 필요) ·
+        <b>cta</b>: 검은 배경 행동 유도 박스
+      </div>
+
+      <div id="sectionList" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- =============== 탭: 내보내기/가져오기 =============== -->
+    <div class="tab hidden" data-tab="export">
+      <h1>내보내기 / 가져오기</h1>
+      <p class="sub">백업·복원·다른 환경으로 이전</p>
+
+      <div class="card">
+        <h3>JSON 내보내기</h3>
+        <p style="font-size:13px; color:var(--muted); margin: 0 0 14px;">
+          현재 설정 · 섹션 · 아이템 전체를 JSON 파일로 저장합니다.
+        </p>
+        <button class="btn btn-primary" id="btnExport">backup.json 다운로드</button>
+      </div>
+
+      <div class="card">
+        <h3>JSON 가져오기 (덮어쓰기)</h3>
+        <p style="font-size:13px; color:var(--muted); margin: 0 0 14px;">
+          ⚠️ 현재 데이터를 덮어씁니다. 먼저 내보내기로 백업을 권장합니다.
+        </p>
+        <input type="file" id="importFile" accept="application/json" />
+        <div style="margin-top:10px;"><button class="btn btn-danger" id="btnImport">가져오기 실행</button></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ==================== 섹션 편집 모달 ==================== -->
+<div class="modal-bg" id="sectionModal">
+  <div class="modal">
+    <h2 id="sectionModalTitle">섹션 편집</h2>
+    <div class="grid-2">
+      <div>
+        <label>슬러그 (URL 앵커, 영문소문자·숫자·하이픈)</label>
+        <input id="sec_slug" />
+      </div>
+      <div>
+        <label>타입</label>
+        <select id="sec_type">
+          <option value="hero">hero — 메인 히어로</option>
+          <option value="text">text — 본문 텍스트</option>
+          <option value="image_text">image_text — 이미지+텍스트</option>
+          <option value="gallery">gallery — 카드 그리드</option>
+          <option value="cta">cta — 행동 유도 박스</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div><label>제목 (Title)</label><input id="sec_title" /></div>
+      <div><label>부제 (Subtitle)</label><input id="sec_subtitle" /></div>
+    </div>
+    <label>본문 (Body) — 줄바꿈 그대로 적용됩니다</label>
+    <textarea id="sec_body"></textarea>
+    <div class="grid-2">
+      <div>
+        <label>이미지 URL</label>
+        <input id="sec_image_url" placeholder="https://..." />
+        <div class="thumb" id="sec_image_preview" style="margin-top:8px;"></div>
+      </div>
+      <div>
+        <label>버튼 라벨</label><input id="sec_link_label" />
+        <label>버튼 링크 URL</label><input id="sec_link_url" placeholder="#anchor 또는 https://..." />
+        <label>노출 여부</label>
+        <select id="sec_is_visible"><option value="true">노출</option><option value="false">숨김</option></select>
+      </div>
+    </div>
+
+    <!-- 아이템 에디터 (gallery 타입일 때 표시) -->
+    <div id="itemsEditor" class="hidden" style="margin-top: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-family:var(--mono); font-size:13px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase;">갤러리 아이템</h3>
+        <button class="btn btn-accent" id="btnNewItem">＋ 아이템 추가</button>
+      </div>
+      <div id="itemList" style="margin-top:10px;"></div>
+      <p style="font-size:11px; color:var(--muted); margin:10px 0 0;">※ 아이템은 섹션 저장과 동시에 저장되지 않고, 각 아이템 편집 후 즉시 저장됩니다.</p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="btnDeleteSection">삭제</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" id="btnCloseSection">취소</button>
+      <button class="btn btn-primary" id="btnSaveSection">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 아이템 편집 모달 ==================== -->
+<div class="modal-bg" id="itemModal">
+  <div class="modal">
+    <h2 id="itemModalTitle">아이템 편집</h2>
+    <div class="grid-2">
+      <div><label>제목</label><input id="item_title" /></div>
+      <div><label>부제</label><input id="item_subtitle" /></div>
+    </div>
+    <label>설명</label>
+    <textarea id="item_description"></textarea>
+    <div class="grid-2">
+      <div><label>이미지 URL</label><input id="item_image_url" />
+        <div class="thumb" id="item_image_preview" style="margin-top:8px;"></div>
+      </div>
+      <div>
+        <label>링크 URL</label><input id="item_link_url" />
+        <label>태그 (예: NEW, HOT)</label><input id="item_tag" />
+        <label>가격 (예: ₩59,000) · 선택</label><input id="item_price" />
+        <label>노출</label>
+        <select id="item_is_visible"><option value="true">노출</option><option value="false">숨김</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="btnDeleteItem">삭제</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" id="btnCloseItem">취소</button>
+      <button class="btn btn-primary" id="btnSaveItem">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+// ================== Supabase 설정 ==================
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+
+const configured = !SUPABASE_URL.includes('YOUR-PROJECT');
+const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+const supabase = configured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession:true, autoRefreshToken:true }
+}) : null;
+
+// ================== 유틸 ==================
+const $ = (s,p=document) => p.querySelector(s);
+const $$ = (s,p=document) => Array.from(p.querySelectorAll(s));
+
+function toast(msg, type='ok') {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = type;
+  t.style.display = 'block';
+  clearTimeout(t._t);
+  t._t = setTimeout(()=> t.style.display='none', 2600);
+}
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ================== 로그인 ==================
+async function checkAuth() {
+  if (!configured) {
+    alert('Supabase URL / Anon Key가 설정되지 않았습니다.\nadmin.html 상단의 SUPABASE_URL, SUPABASE_ANON_KEY를 먼저 입력해 주세요.');
+    return false;
+  }
+  const { data } = await supabase.auth.getSession();
+  return !!data.session;
+}
+async function showApp() {
+  $('#loginShell').classList.add('hidden');
+  $('#adminShell').classList.remove('hidden');
+  const { data } = await supabase.auth.getUser();
+  $('#userEmail').textContent = data?.user?.email || '—';
+  await loadSettings();
+  await loadSections();
+}
+function showLogin() {
+  $('#loginShell').classList.remove('hidden');
+  $('#adminShell').classList.add('hidden');
+}
+
+$('#btnLogin').onclick = async () => {
+  if (!configured) { toast('Supabase 설정 필요', 'err'); return; }
+  const email = $('#loginEmail').value.trim();
+  const password = $('#loginPassword').value;
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return toast('로그인 실패: '+error.message, 'err');
+  toast('로그인 완료');
+  await showApp();
+};
+$('#btnLogout').onclick = async (e) => {
+  e.preventDefault();
+  await supabase.auth.signOut();
+  showLogin();
+};
+
+// ================== 탭 전환 ==================
+$$('.side-link').forEach(a => {
+  a.onclick = (e) => {
+    e.preventDefault();
+    const tab = a.dataset.tab;
+    $$('.side-link').forEach(x => x.classList.toggle('active', x===a));
+    $$('.tab').forEach(t => t.classList.toggle('hidden', t.dataset.tab !== tab));
+  };
+});
+
+// ================== 사이트 설정 ==================
+const SETTING_FIELDS = [
+  'site_name','site_tagline','logo_url','seo_description',
+  'contact_email','contact_phone','contact_address',
+  'social_instagram','social_youtube','social_facebook',
+  'footer_text','theme_primary_color','theme_accent_color'
+];
+async function loadSettings() {
+  const { data, error } = await supabase.from('site_settings').select('*').eq('id',1).single();
+  if (error) return toast(error.message, 'err');
+  SETTING_FIELDS.forEach(k => { const el = $(`#f_${k}`); if (el) el.value = data?.[k] ?? ''; });
+}
+$('#btnReloadSettings').onclick = () => loadSettings();
+$('#btnSaveSettings').onclick = async () => {
+  const payload = { id:1 };
+  SETTING_FIELDS.forEach(k => payload[k] = $(`#f_${k}`).value || null);
+  const { error } = await supabase.from('site_settings').upsert(payload);
+  if (error) return toast('저장 실패: '+error.message, 'err');
+  toast('저장 완료');
+};
+
+// ================== 섹션 목록 ==================
+let SECTIONS_CACHE = [];
+async function loadSections() {
+  const { data, error } = await supabase
+    .from('sections').select('*, items(count)').order('sort_order', { ascending:true });
+  if (error) return toast(error.message, 'err');
+  SECTIONS_CACHE = data;
+  renderSectionList();
+}
+function renderSectionList() {
+  const list = $('#sectionList');
+  if (!SECTIONS_CACHE.length) {
+    list.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">섹션이 없습니다. 오른쪽 위 "＋ 새 섹션" 을 눌러 추가하세요.</div>`;
+    return;
+  }
+  list.innerHTML = SECTIONS_CACHE.map(s => `
+    <div class="section-row" draggable="true" data-id="${s.id}">
+      <span class="handle">⋮⋮</span>
+      <span class="chip ${s.type}">${esc(s.type||'')}</span>
+      <div><b>${esc(s.title||'(제목 없음)')}</b>${s.subtitle ? `<div style="color:var(--muted); font-size:11px;">${esc(s.subtitle)}</div>`:''}</div>
+      <div style="color:var(--muted); font-size:11px;">#${esc(s.slug||'-')} ${s.items?.[0]?.count ? `· ${s.items[0].count} items` : ''}</div>
+      <span class="chip ${s.is_visible===false?'off':''}">${s.is_visible===false?'숨김':'노출'}</span>
+      <button class="icon-action" title="편집" data-act="edit" data-id="${s.id}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
+      <button class="icon-action" title="삭제" data-act="delete" data-id="${s.id}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+      </button>
+    </div>
+  `).join('');
+
+  // 액션
+  list.querySelectorAll('[data-act="edit"]').forEach(b => b.onclick = () => openSectionModal(b.dataset.id));
+  list.querySelectorAll('[data-act="delete"]').forEach(b => b.onclick = () => deleteSection(b.dataset.id));
+
+  // DnD 정렬
+  let dragId = null;
+  list.querySelectorAll('.section-row').forEach(row => {
+    row.ondragstart = e => { dragId = row.dataset.id; row.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; };
+    row.ondragend   = () => row.classList.remove('dragging');
+    row.ondragover  = e => { e.preventDefault();
+      const after = row.getBoundingClientRect().top + row.offsetHeight/2 < e.clientY;
+      const dragging = list.querySelector('.dragging');
+      if (!dragging || dragging === row) return;
+      list.insertBefore(dragging, after ? row.nextSibling : row);
+    };
+    row.ondrop = async () => {
+      const ids = Array.from(list.querySelectorAll('.section-row')).map(r => r.dataset.id);
+      const updates = ids.map((id,i) => ({ id, sort_order: i+1 }));
+      // 개별 업데이트 (upsert with id 유지)
+      for (const u of updates) await supabase.from('sections').update({ sort_order:u.sort_order }).eq('id', u.id);
+      SECTIONS_CACHE.sort((a,b)=> ids.indexOf(a.id) - ids.indexOf(b.id));
+      toast('순서 저장 완료');
+    };
+  });
+}
+$('#btnNewSection').onclick = () => openSectionModal(null);
+
+// ================== 섹션 모달 ==================
+let editingSection = null;
+let ITEMS_CACHE = [];
+
+async function openSectionModal(id) {
+  const modal = $('#sectionModal');
+  modal.classList.add('open');
+  if (id) {
+    const s = SECTIONS_CACHE.find(x => x.id === id) || (await supabase.from('sections').select('*').eq('id',id).single()).data;
+    editingSection = s;
+    $('#sectionModalTitle').textContent = '섹션 편집 · ' + (s.title || '');
+    $('#sec_slug').value = s.slug || '';
+    $('#sec_type').value = s.type || 'text';
+    $('#sec_title').value = s.title || '';
+    $('#sec_subtitle').value = s.subtitle || '';
+    $('#sec_body').value = s.body || '';
+    $('#sec_image_url').value = s.image_url || '';
+    $('#sec_link_label').value = s.link_label || '';
+    $('#sec_link_url').value = s.link_url || '';
+    $('#sec_is_visible').value = s.is_visible === false ? 'false' : 'true';
+    $('#btnDeleteSection').classList.remove('hidden');
+    refreshImagePreview('#sec_image_url', '#sec_image_preview');
+    await loadItems(id);
+  } else {
+    editingSection = null;
+    $('#sectionModalTitle').textContent = '새 섹션';
+    ['slug','title','subtitle','body','image_url','link_label','link_url'].forEach(k => $(`#sec_${k}`).value = '');
+    $('#sec_type').value = 'text';
+    $('#sec_is_visible').value = 'true';
+    $('#btnDeleteSection').classList.add('hidden');
+    refreshImagePreview('#sec_image_url', '#sec_image_preview');
+    $('#itemsEditor').classList.add('hidden');
+  }
+  toggleItemsEditor();
+}
+$('#sec_type').onchange = toggleItemsEditor;
+function toggleItemsEditor() {
+  const isGallery = $('#sec_type').value === 'gallery';
+  $('#itemsEditor').classList.toggle('hidden', !(isGallery && editingSection));
+}
+$('#btnCloseSection').onclick = () => $('#sectionModal').classList.remove('open');
+
+$('#sec_image_url').oninput = () => refreshImagePreview('#sec_image_url','#sec_image_preview');
+function refreshImagePreview(inputSel, previewSel) {
+  const url = $(inputSel).value.trim();
+  $(previewSel).style.backgroundImage = url ? `url("${url}")` : '';
+}
+
+$('#btnSaveSection').onclick = async () => {
+  const payload = {
+    slug: ($('#sec_slug').value || '').trim() || 'section-'+Date.now(),
+    type: $('#sec_type').value,
+    title: $('#sec_title').value || null,
+    subtitle: $('#sec_subtitle').value || null,
+    body: $('#sec_body').value || null,
+    image_url: $('#sec_image_url').value || null,
+    link_label: $('#sec_link_label').value || null,
+    link_url: $('#sec_link_url').value || null,
+    is_visible: $('#sec_is_visible').value === 'true',
+  };
+  let res;
+  if (editingSection) {
+    res = await supabase.from('sections').update(payload).eq('id', editingSection.id).select().single();
+  } else {
+    payload.sort_order = (SECTIONS_CACHE.length+1);
+    res = await supabase.from('sections').insert(payload).select().single();
+  }
+  if (res.error) return toast('저장 실패: '+res.error.message, 'err');
+  toast('섹션 저장 완료');
+  editingSection = res.data;
+  toggleItemsEditor();
+  await loadSections();
+};
+$('#btnDeleteSection').onclick = async () => {
+  if (!editingSection) return;
+  if (!confirm('섹션을 삭제하시겠습니까? (내부 아이템도 모두 삭제됩니다)')) return;
+  const { error } = await supabase.from('sections').delete().eq('id', editingSection.id);
+  if (error) return toast('삭제 실패: '+error.message, 'err');
+  $('#sectionModal').classList.remove('open');
+  toast('삭제 완료');
+  await loadSections();
+};
+
+async function deleteSection(id) {
+  if (!confirm('이 섹션을 삭제할까요? (아이템 함께 삭제)')) return;
+  const { error } = await supabase.from('sections').delete().eq('id', id);
+  if (error) return toast(error.message, 'err');
+  toast('삭제 완료');
+  await loadSections();
+}
+
+// ================== 아이템 ==================
+async function loadItems(sectionId) {
+  const { data, error } = await supabase.from('items').select('*').eq('section_id', sectionId).order('sort_order', { ascending:true });
+  if (error) return toast(error.message, 'err');
+  ITEMS_CACHE = data;
+  renderItemList();
+}
+function renderItemList() {
+  const el = $('#itemList');
+  if (!ITEMS_CACHE.length) {
+    el.innerHTML = `<div style="padding:14px; color:var(--muted); font-size:12px; text-align:center; background:#141418; border-radius:6px;">아이템이 없습니다.</div>`;
+    return;
+  }
+  el.innerHTML = ITEMS_CACHE.map(i => `
+    <div class="item-row" draggable="true" data-id="${i.id}">
+      <span class="handle">⋮⋮</span>
+      <img src="${i.image_url||''}" onerror="this.style.opacity=.2"/>
+      <div><b>${esc(i.title||'(제목 없음)')}</b>${i.subtitle?`<div style="color:var(--muted); font-size:11px;">${esc(i.subtitle)}</div>`:''}</div>
+      <div style="color:var(--muted); font-size:11px;">${i.tag?`<span class="chip hero" style="margin-right:4px;">${esc(i.tag)}</span>`:''}${i.is_visible===false?'숨김':''}</div>
+      <button class="icon-action" data-act="item-edit" data-id="${i.id}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
+      <button class="icon-action" data-act="item-delete" data-id="${i.id}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>
+      </button>
+    </div>
+  `).join('');
+  el.querySelectorAll('[data-act="item-edit"]').forEach(b => b.onclick = () => openItemModal(b.dataset.id));
+  el.querySelectorAll('[data-act="item-delete"]').forEach(b => b.onclick = () => deleteItem(b.dataset.id));
+
+  // DnD for items
+  el.querySelectorAll('.item-row').forEach(row => {
+    row.ondragstart = e => { row.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; };
+    row.ondragend = () => row.classList.remove('dragging');
+    row.ondragover = e => { e.preventDefault();
+      const after = row.getBoundingClientRect().top + row.offsetHeight/2 < e.clientY;
+      const dragging = el.querySelector('.dragging');
+      if (!dragging || dragging === row) return;
+      el.insertBefore(dragging, after ? row.nextSibling : row);
+    };
+    row.ondrop = async () => {
+      const ids = Array.from(el.querySelectorAll('.item-row')).map(r => r.dataset.id);
+      for (let i=0;i<ids.length;i++) await supabase.from('items').update({ sort_order:i+1 }).eq('id', ids[i]);
+      toast('아이템 순서 저장');
+    };
+  });
+}
+
+let editingItem = null;
+$('#btnNewItem').onclick = () => openItemModal(null);
+function openItemModal(id) {
+  $('#itemModal').classList.add('open');
+  if (id) {
+    editingItem = ITEMS_CACHE.find(x=>x.id===id);
+    $('#itemModalTitle').textContent = '아이템 편집';
+    $('#item_title').value = editingItem.title||'';
+    $('#item_subtitle').value = editingItem.subtitle||'';
+    $('#item_description').value = editingItem.description||'';
+    $('#item_image_url').value = editingItem.image_url||'';
+    $('#item_link_url').value = editingItem.link_url||'';
+    $('#item_tag').value = editingItem.tag||'';
+    $('#item_price').value = editingItem.price||'';
+    $('#item_is_visible').value = editingItem.is_visible===false?'false':'true';
+    $('#btnDeleteItem').classList.remove('hidden');
+  } else {
+    editingItem = null;
+    $('#itemModalTitle').textContent = '새 아이템';
+    ['title','subtitle','description','image_url','link_url','tag','price'].forEach(k=>$(`#item_${k}`).value='');
+    $('#item_is_visible').value='true';
+    $('#btnDeleteItem').classList.add('hidden');
+  }
+  refreshImagePreview('#item_image_url','#item_image_preview');
+}
+$('#item_image_url').oninput = () => refreshImagePreview('#item_image_url','#item_image_preview');
+$('#btnCloseItem').onclick = () => $('#itemModal').classList.remove('open');
+
+$('#btnSaveItem').onclick = async () => {
+  if (!editingSection) return toast('섹션을 먼저 저장해 주세요','err');
+  const payload = {
+    section_id: editingSection.id,
+    title: $('#item_title').value || null,
+    subtitle: $('#item_subtitle').value || null,
+    description: $('#item_description').value || null,
+    image_url: $('#item_image_url').value || null,
+    link_url: $('#item_link_url').value || null,
+    tag: $('#item_tag').value || null,
+    price: $('#item_price').value || null,
+    is_visible: $('#item_is_visible').value === 'true',
+  };
+  let res;
+  if (editingItem) res = await supabase.from('items').update(payload).eq('id', editingItem.id).select().single();
+  else {
+    payload.sort_order = ITEMS_CACHE.length + 1;
+    res = await supabase.from('items').insert(payload).select().single();
+  }
+  if (res.error) return toast('저장 실패: '+res.error.message,'err');
+  toast('아이템 저장 완료');
+  $('#itemModal').classList.remove('open');
+  await loadItems(editingSection.id);
+};
+$('#btnDeleteItem').onclick = async () => {
+  if (!editingItem) return;
+  if (!confirm('삭제하시겠습니까?')) return;
+  const { error } = await supabase.from('items').delete().eq('id', editingItem.id);
+  if (error) return toast(error.message,'err');
+  $('#itemModal').classList.remove('open');
+  toast('삭제 완료');
+  await loadItems(editingSection.id);
+};
+async function deleteItem(id) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  await supabase.from('items').delete().eq('id', id);
+  await loadItems(editingSection.id);
+  toast('삭제 완료');
+}
+
+// ================== 내보내기/가져오기 ==================
+$('#btnExport').onclick = async () => {
+  const [settings, sections, items] = await Promise.all([
+    supabase.from('site_settings').select('*'),
+    supabase.from('sections').select('*'),
+    supabase.from('items').select('*'),
+  ]);
+  const blob = new Blob([JSON.stringify({
+    exported_at: new Date().toISOString(),
+    settings: settings.data, sections: sections.data, items: items.data
+  }, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `bold-backup-${Date.now()}.json`;
+  a.click();
+  toast('내보내기 완료');
+};
+$('#btnImport').onclick = async () => {
+  const file = $('#importFile').files[0];
+  if (!file) return toast('파일을 선택하세요','err');
+  if (!confirm('현재 데이터를 덮어씁니다. 진행할까요?')) return;
+  const text = await file.text();
+  const data = JSON.parse(text);
+  // 기존 데이터 삭제
+  await supabase.from('items').delete().neq('id','00000000-0000-0000-0000-000000000000');
+  await supabase.from('sections').delete().neq('id','00000000-0000-0000-0000-000000000000');
+  if (data.settings?.[0]) await supabase.from('site_settings').upsert({ ...data.settings[0], id:1 });
+  if (data.sections?.length) await supabase.from('sections').insert(data.sections);
+  if (data.items?.length) await supabase.from('items').insert(data.items);
+  toast('가져오기 완료');
+  await loadSettings(); await loadSections();
+};
+
+// ================== 시작 ==================
+(async () => {
+  if (await checkAuth()) await showApp(); else showLogin();
+})();
+</script>
+</body>
+</html>

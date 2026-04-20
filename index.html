@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>볼드 · BOLD</title>
+<meta name="description" id="metaDescription" content="BOLD — 대담한 브랜드, 새로운 감각" />
+
+<!-- 원본 쇼핑몰의 골격을 참고한 자체 레이아웃: 헤더 · 사이드드로어 · 메인 · 푸터 -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --fg: #0a0a0a;
+    --muted: #6b6b6b;
+    --line: #111;
+    --accent: #ff3b30;
+    --serif: 'Noto Serif KR', serif;
+    --sans:  'Noto Sans KR', 'Archivo', sans-serif;
+    --display: 'Archivo', 'Noto Serif KR', serif;
+  }
+  *,*::before,*::after { box-sizing: border-box; }
+  html,body { margin:0; padding:0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color:inherit; text-decoration:none; }
+  img { max-width:100%; display:block; }
+  button { font-family:inherit; cursor:pointer; border:0; background:none; color:inherit; }
+
+  /* ===== 헤더 ===== */
+  .top-util {
+    display:flex; justify-content:flex-end; align-items:center;
+    gap:18px; font-size:11px; letter-spacing:.12em;
+    padding: 10px 28px; border-bottom: 1px solid rgba(0,0,0,.08);
+    text-transform:uppercase;
+  }
+  .top-util a:hover { color: var(--accent); }
+
+  .header {
+    position: sticky; top:0; z-index: 40;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner {
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items:center;
+    padding: 22px 28px;
+  }
+  .header-left, .header-right {
+    display:flex; align-items:center; gap: 18px;
+  }
+  .header-right { justify-content:flex-end; }
+  .logo {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 34px;
+    letter-spacing: .2em;
+    text-align:center;
+    display:inline-block;
+  }
+  .logo img { max-height:44px; display:inline-block; }
+  .icon-btn {
+    width:42px; height:42px; display:inline-flex;
+    align-items:center; justify-content:center;
+    border:1px solid transparent; border-radius:50%;
+    transition: .2s;
+  }
+  .icon-btn:hover { border-color: var(--line); }
+  .icon-btn svg { width:20px; height:20px; }
+
+  /* 네비 */
+  .nav {
+    display:flex; justify-content:center; gap: 42px;
+    padding: 14px 0 22px;
+    font-family: var(--display);
+    font-weight: 500;
+    letter-spacing: .18em;
+    font-size: 13px;
+    text-transform: uppercase;
+  }
+  .nav a { position:relative; padding: 4px 2px; }
+  .nav a::after {
+    content:''; position:absolute; left:0; bottom:-4px;
+    width:100%; height:1px; background: var(--fg);
+    transform-origin:right; transform:scaleX(0);
+    transition: transform .35s ease;
+  }
+  .nav a:hover::after { transform-origin:left; transform:scaleX(1); }
+
+  /* ===== 사이드 드로어 ===== */
+  .aside {
+    position:fixed; top:0; left:-360px; height:100vh; width:340px;
+    background:#111; color:#fff; padding: 32px 28px;
+    transition: left .45s cubic-bezier(.6,.01,.05,1);
+    z-index:80; display:flex; flex-direction:column;
+  }
+  .aside.open { left:0; }
+  .aside-logo { font-family:var(--display); font-weight:900; font-size:22px; letter-spacing:.25em; }
+  .aside-close { position:absolute; top:22px; right:22px; }
+  .aside-close svg { width:22px; height:22px; }
+  .aside nav { margin-top: 48px; display:flex; flex-direction:column; gap:22px; font-family:var(--display); font-size:18px; letter-spacing:.2em; text-transform:uppercase; }
+  .aside-footer { margin-top:auto; font-size:11px; opacity:.5; letter-spacing:.15em; }
+
+  .backdrop {
+    position:fixed; inset:0; background: rgba(0,0,0,.5);
+    opacity:0; pointer-events:none; transition: .3s; z-index:70;
+  }
+  .backdrop.on { opacity:1; pointer-events:auto; }
+
+  /* ===== 히어로 ===== */
+  .hero {
+    min-height: 78vh;
+    display:grid;
+    grid-template-columns: 1.1fr .9fr;
+    align-items:end;
+    padding: 60px 28px 72px;
+    gap: 40px;
+    position:relative;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-title {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(60px, 12vw, 200px);
+    line-height: .88;
+    letter-spacing: -.02em;
+    margin:0;
+    text-transform: uppercase;
+  }
+  .hero-title em {
+    font-style: italic;
+    font-family: var(--serif);
+    font-weight: 900;
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-family: var(--serif);
+    font-size: clamp(15px, 1.3vw, 19px);
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 0 0 18px;
+    color: #1a1a1a;
+  }
+  .hero-sub small { display:block; font-family:var(--display); font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+  .hero-visual {
+    position:absolute;
+    top: 80px; right: 28px;
+    width: 40vw; max-width: 520px; aspect-ratio: 4/5;
+    background: #111 center/cover no-repeat;
+    filter: grayscale(.2);
+  }
+  .hero-marquee {
+    position:absolute; bottom: 18px; left:0; right:0;
+    white-space:nowrap; overflow:hidden;
+    font-family:var(--display); font-size:12px; letter-spacing:.3em; text-transform:uppercase;
+    color: var(--muted);
+    border-top:1px solid rgba(0,0,0,.15);
+    padding: 14px 0;
+  }
+  .hero-marquee span { display:inline-block; padding: 0 30px; animation: scroll 28s linear infinite; }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ===== 공통 섹션 ===== */
+  section.block {
+    padding: 110px 28px;
+    border-bottom: 1px solid var(--line);
+    position:relative;
+  }
+  .block-header {
+    display:flex; align-items:baseline; gap: 24px;
+    margin-bottom: 56px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+  }
+  .block-index {
+    font-family: var(--display); font-weight:700;
+    font-size: 12px; letter-spacing:.3em;
+    color: var(--muted);
+  }
+  .block-title {
+    font-family: var(--display); font-weight: 900;
+    font-size: clamp(36px, 6vw, 84px);
+    letter-spacing:-.01em;
+    margin:0; text-transform: uppercase;
+  }
+  .block-subtitle {
+    font-family: var(--serif); font-size:14px; color:var(--muted);
+    margin-left:auto;
+  }
+
+  /* 텍스트 블록 */
+  .text-body {
+    font-family: var(--serif);
+    font-size: clamp(17px, 1.6vw, 24px);
+    line-height: 1.8;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .text-body p + p { margin-top: 1.2em; }
+
+  /* 이미지+텍스트 블록 */
+  .image-text {
+    display:grid; grid-template-columns: 1.1fr 1fr; gap:60px;
+    align-items:center;
+  }
+  .image-text img { aspect-ratio: 4/5; object-fit:cover; width:100%; background:#eee; }
+  .image-text .text h3 {
+    font-family: var(--display); font-size: clamp(28px,3vw,44px);
+    margin:0 0 16px; font-weight:900; letter-spacing:-.01em;
+  }
+  .image-text .text p {
+    font-family: var(--serif); line-height:1.8; font-size:16px;
+    color:#222;
+  }
+
+  /* 갤러리 (쇼핑몰 상품 그리드 스타일) */
+  .gallery-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 32px 22px;
+  }
+  .card {
+    display:block;
+    transition: transform .4s;
+  }
+  .card:hover { transform: translateY(-4px); }
+  .card .ph {
+    aspect-ratio: 3/4;
+    background: #e8e5de center/cover no-repeat;
+    margin-bottom: 14px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card .ph::after {
+    content:''; position:absolute; inset:0; background:rgba(0,0,0,0);
+    transition: .3s;
+  }
+  .card:hover .ph::after { background: rgba(0,0,0,.08); }
+  .card-tag {
+    position:absolute; top:12px; left:12px;
+    font-family: var(--display); font-size:10px; letter-spacing:.2em;
+    background: var(--accent); color:#fff;
+    padding: 4px 8px; text-transform:uppercase;
+  }
+  .card h4 { font-family:var(--display); font-weight:700; font-size:14px; letter-spacing:.05em; margin: 8px 0 4px; text-transform:uppercase; }
+  .card p  { font-family:var(--serif); font-size:13px; color: var(--muted); margin:0; line-height:1.5; }
+  .card .price { font-family:var(--display); font-size:13px; margin-top:6px; font-weight:700; }
+
+  /* CTA */
+  .cta {
+    text-align:center;
+    padding: 140px 28px;
+    background: #0a0a0a;
+    color: #f6f4ef;
+    border-bottom:1px solid var(--line);
+  }
+  .cta .block-title { color:#fff; border:0; }
+  .cta-text { font-family: var(--serif); font-size: clamp(18px,2vw,24px); max-width:620px; margin: 0 auto 34px; line-height:1.7; opacity:.85; }
+  .btn-bold {
+    display:inline-block; padding: 18px 44px;
+    border: 1.5px solid #fff;
+    font-family: var(--display); letter-spacing:.25em; font-size:13px; text-transform:uppercase;
+    transition: .25s;
+  }
+  .btn-bold:hover { background:#fff; color:#0a0a0a; }
+
+  /* 푸터 */
+  footer {
+    padding: 70px 28px 40px;
+    background: #f0ede6;
+    font-size:12px; color: var(--muted);
+    font-family: var(--display); letter-spacing:.1em;
+  }
+  .footer-top {
+    display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:40px;
+    padding-bottom: 44px; border-bottom:1px solid rgba(0,0,0,.15);
+  }
+  .footer-top h5 { font-family:var(--display); font-weight:900; font-size:13px; letter-spacing:.2em; color:var(--fg); margin:0 0 16px; text-transform:uppercase; }
+  .footer-top .brand { font-family:var(--display); font-weight:900; font-size:28px; letter-spacing:.2em; color:var(--fg); }
+  .footer-top ul { list-style:none; padding:0; margin: 10px 0 0; display:flex; flex-direction:column; gap:8px; }
+  .footer-top a:hover { color:var(--accent); }
+  .footer-bottom { padding-top: 24px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+
+  /* 로딩 상태 */
+  .loading { opacity:.4; pointer-events:none; }
+  .empty-note { text-align:center; font-family:var(--serif); color:var(--muted); padding: 60px 0; }
+
+  /* ===== 반응형 ===== */
+  @media (max-width: 900px) {
+    .nav { gap:20px; font-size:11px; flex-wrap:wrap; padding: 10px 14px 18px; }
+    .hero { grid-template-columns: 1fr; padding: 40px 20px 60px; min-height:auto; }
+    .hero-visual { position:relative; top:auto; right:auto; width:100%; max-width:none; order:-1; margin-bottom:24px; aspect-ratio: 5/4; }
+    .hero-marquee { position:relative; }
+    section.block { padding: 72px 20px; }
+    .block-header { flex-direction:column; align-items:flex-start; gap:10px; }
+    .block-subtitle { margin-left:0; }
+    .image-text { grid-template-columns: 1fr; gap:30px; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .header-inner { padding: 16px 18px; }
+    .logo { font-size:24px; }
+    .top-util { padding: 8px 18px; font-size:10px; gap:12px; }
+  }
+
+  /* 스크롤 리빌 */
+  .reveal { opacity:0; transform: translateY(24px); transition: opacity .8s, transform .8s; }
+  .reveal.on { opacity:1; transform:none; }
+</style>
+</head>
+<body>
+
+<!-- 상단 유틸 -->
+<div class="top-util">
+  <a href="admin.html">관리자</a>
+  <a href="#contact">CONTACT</a>
+</div>
+
+<!-- 헤더 -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <button class="icon-btn" id="btnOpenAside" aria-label="메뉴 열기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <button class="icon-btn" id="btnSearch" aria-label="검색">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+    </div>
+    <a class="logo" href="#top" id="siteLogo">BOLD</a>
+    <div class="header-right">
+      <a href="#about" class="icon-btn" aria-label="About">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+      </a>
+      <a href="#contact" class="icon-btn" aria-label="Contact">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 6l8 7 8-7"/></svg>
+      </a>
+    </div>
+  </div>
+  <nav class="nav" id="mainNav">
+    <!-- 섹션에 맞춰 동적으로 채워짐 -->
+  </nav>
+</header>
+
+<!-- 사이드 드로어 -->
+<div class="backdrop" id="backdrop"></div>
+<aside class="aside" id="aside">
+  <button class="aside-close" id="btnCloseAside" aria-label="닫기">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5l14 14M19 5L5 19"/></svg>
+  </button>
+  <div class="aside-logo" id="asideLogo">BOLD</div>
+  <nav id="asideNav"></nav>
+  <div class="aside-footer" id="asideFooter">© BOLD</div>
+</aside>
+
+<!-- 메인: Supabase에서 섹션을 읽어와 동적으로 렌더 -->
+<main id="main">
+  <div class="empty-note" id="loadingNote">불러오는 중…</div>
+</main>
+
+<!-- 푸터 -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="brand" id="footerBrand">BOLD</div>
+      <p style="font-family:var(--serif); margin:12px 0 0; line-height:1.7;" id="footerDesc">
+        대담한 브랜드, 새로운 감각.
+      </p>
+    </div>
+    <div>
+      <h5>CONTACT</h5>
+      <ul id="footerContact"></ul>
+    </div>
+    <div>
+      <h5>SOCIAL</h5>
+      <ul id="footerSocial"></ul>
+    </div>
+    <div>
+      <h5>LINK</h5>
+      <ul>
+        <li><a href="#top">TOP</a></li>
+        <li><a href="admin.html">ADMIN</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span id="footerCopyright">COPYRIGHT (c) BOLD ALL RIGHTS RESERVED.</span>
+    <span>DESIGNED WITH CARE</span>
+  </div>
+</footer>
+
+<script type="module">
+  // ================== Supabase 설정 ==================
+  // ※ 아래 두 값만 본인 Supabase 프로젝트 값으로 교체하세요.
+  const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+
+  // Supabase JS (ESM CDN)
+  const useSupabase = !SUPABASE_URL.includes('YOUR-PROJECT');
+  let supabase = null;
+  if (useSupabase) {
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+
+  // ================== 사이드 드로어 ==================
+  const aside = document.getElementById('aside');
+  const backdrop = document.getElementById('backdrop');
+  document.getElementById('btnOpenAside').onclick = () => { aside.classList.add('open'); backdrop.classList.add('on'); };
+  document.getElementById('btnCloseAside').onclick = () => { aside.classList.remove('open'); backdrop.classList.remove('on'); };
+  backdrop.onclick = () => { aside.classList.remove('open'); backdrop.classList.remove('on'); };
+
+  // ================== 데이터 가져오기 ==================
+  async function fetchSettings() {
+    if (!useSupabase) return defaultSettings();
+    const { data, error } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+    if (error) { console.warn(error); return defaultSettings(); }
+    return data;
+  }
+  async function fetchSections() {
+    if (!useSupabase) return defaultSections();
+    const { data, error } = await supabase
+      .from('sections')
+      .select('*, items(*)')
+      .eq('is_visible', true)
+      .order('sort_order', { ascending: true });
+    if (error) { console.warn(error); return defaultSections(); }
+    // items 정렬
+    data.forEach(s => {
+      if (s.items) s.items = s.items
+        .filter(i => i.is_visible !== false)
+        .sort((a,b)=> (a.sort_order||0) - (b.sort_order||0));
+    });
+    return data;
+  }
+
+  // 기본 샘플 (Supabase 미설정 시)
+  function defaultSettings() {
+    return {
+      site_name: '볼드', site_tagline: 'BOLD',
+      footer_text: 'COPYRIGHT (c) BOLD ALL RIGHTS RESERVED.',
+      contact_email: 'hello@bold.kr',
+      contact_phone: '010-0000-0000',
+      contact_address: '전주시 덕진구',
+      social_instagram: 'https://instagram.com/',
+      theme_primary_color: '#0a0a0a',
+      theme_accent_color: '#ff3b30',
+      seo_description: 'BOLD — 대담한 브랜드',
+    };
+  }
+  function defaultSections() {
+    return [
+      { id:'s1', slug:'hero', type:'hero', sort_order:1,
+        title:'BOLD', subtitle:'대담한 브랜드, 새로운 감각',
+        body:'우리는 당신의 이야기를 대담하게 풀어냅니다. 섬세하게 다듬어진 기획과 과감한 실행 사이에서 BOLD는 태어났습니다.',
+        image_url:'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=900',
+        link_label:'BROWSE', link_url:'#about', extra:{}, items:[] },
+      { id:'s2', slug:'about', type:'text', sort_order:2,
+        title:'ABOUT', subtitle:'브랜드 소개',
+        body:'BOLD는 전주에 기반을 둔 창작 스튜디오입니다.\n\n우리는 이야기와 이미지, 그리고 태도가 만나는 지점에서 브랜드를 설계합니다. 크기가 아니라 밀도로 승부하며, 한 번의 좋은 선택이 열 개의 평범함을 이긴다고 믿습니다.',
+        items:[] },
+      { id:'s3', slug:'works', type:'gallery', sort_order:3,
+        title:'WORKS', subtitle:'우리의 작업',
+        body:'최근 진행한 프로젝트를 소개합니다.',
+        items:[
+          { id:'i1', title:'Project 01', subtitle:'Brand Identity', tag:'NEW',
+            image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600',
+            link_url:'#' },
+          { id:'i2', title:'Project 02', subtitle:'Editorial',
+            image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600',
+            link_url:'#' },
+          { id:'i3', title:'Project 03', subtitle:'Campaign',
+            image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600',
+            link_url:'#' },
+          { id:'i4', title:'Project 04', subtitle:'Art Direction',
+            image_url:'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=600',
+            link_url:'#' },
+        ]},
+      { id:'s4', slug:'feature', type:'image_text', sort_order:4,
+        title:'PHILOSOPHY',
+        body:'우리의 작업은 장식이 아닌 전략에서 시작합니다. 간결하지만 결코 비어있지 않은, 대담하지만 결코 무례하지 않은 균형을 추구합니다.',
+        image_url:'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=800',
+      },
+      { id:'s5', slug:'contact', type:'cta', sort_order:5,
+        title:'CONTACT', subtitle:'함께 만들어요',
+        body:'새로운 협업 제안이나 문의를 환영합니다.',
+        link_label:'이메일 보내기', link_url:'mailto:hello@bold.kr',
+        items:[] },
+    ];
+  }
+
+  // ================== 렌더 ==================
+  const $ = (s,p=document) => p.querySelector(s);
+  const $$ = (s,p=document) => Array.from(p.querySelectorAll(s));
+
+  function applySettings(s) {
+    document.title = `${s.site_name || '볼드'} · ${s.site_tagline || 'BOLD'}`;
+    $('#metaDescription').content = s.seo_description || '';
+    if (s.logo_url) {
+      $('#siteLogo').innerHTML = `<img src="${s.logo_url}" alt="${s.site_name||''}">`;
+    } else {
+      $('#siteLogo').textContent = s.site_tagline || 'BOLD';
+    }
+    $('#asideLogo').textContent = s.site_tagline || 'BOLD';
+    $('#footerBrand').textContent = s.site_tagline || 'BOLD';
+    $('#footerCopyright').textContent = s.footer_text || '';
+    $('#footerDesc').textContent = s.seo_description || '';
+
+    const contactUl = $('#footerContact'); contactUl.innerHTML = '';
+    if (s.contact_email) contactUl.insertAdjacentHTML('beforeend', `<li><a href="mailto:${s.contact_email}">${s.contact_email}</a></li>`);
+    if (s.contact_phone) contactUl.insertAdjacentHTML('beforeend', `<li>${s.contact_phone}</li>`);
+    if (s.contact_address) contactUl.insertAdjacentHTML('beforeend', `<li>${s.contact_address}</li>`);
+
+    const socialUl = $('#footerSocial'); socialUl.innerHTML = '';
+    if (s.social_instagram) socialUl.insertAdjacentHTML('beforeend', `<li><a href="${s.social_instagram}" target="_blank">INSTAGRAM</a></li>`);
+    if (s.social_youtube) socialUl.insertAdjacentHTML('beforeend', `<li><a href="${s.social_youtube}" target="_blank">YOUTUBE</a></li>`);
+    if (s.social_facebook) socialUl.insertAdjacentHTML('beforeend', `<li><a href="${s.social_facebook}" target="_blank">FACEBOOK</a></li>`);
+
+    if (s.theme_primary_color) document.documentElement.style.setProperty('--fg', s.theme_primary_color);
+    if (s.theme_accent_color)  document.documentElement.style.setProperty('--accent', s.theme_accent_color);
+  }
+
+  function renderNav(sections) {
+    const nav = $('#mainNav');
+    const aside = $('#asideNav');
+    nav.innerHTML = ''; aside.innerHTML = '';
+    sections.forEach(s => {
+      const label = (s.title || s.slug || '').toString();
+      if (!label) return;
+      nav.insertAdjacentHTML('beforeend', `<a href="#${s.slug}">${label}</a>`);
+      aside.insertAdjacentHTML('beforeend', `<a href="#${s.slug}">${label}</a>`);
+    });
+  }
+
+  function renderSection(s, idx) {
+    const anchor = `id="${s.slug}"`;
+    const header = `
+      <div class="block-header reveal">
+        <span class="block-index">№ ${String(idx+1).padStart(2,'0')}</span>
+        <h2 class="block-title">${escape(s.title||'')}</h2>
+        ${s.subtitle ? `<span class="block-subtitle">${escape(s.subtitle)}</span>` : ''}
+      </div>`;
+
+    switch ((s.type||'text')) {
+      case 'hero':
+        return `
+        <section ${anchor} class="hero" style="${s.image_url ? '': 'background:linear-gradient(180deg,#f6f4ef,#ebe7df);'}">
+          <div>
+            <h1 class="hero-title reveal">${escape(s.title||'')}${s.subtitle ? `<br><em>${escape(s.subtitle)}</em>` : ''}</h1>
+            <p class="hero-sub reveal"><small>INTRO</small>${nl2br(escape(s.body||''))}</p>
+            ${s.link_url ? `<a class="btn-bold reveal" style="border-color:var(--fg); color:var(--fg);" href="${s.link_url}">${escape(s.link_label||'LEARN MORE')}</a>`: ''}
+          </div>
+          ${s.image_url ? `<div class="hero-visual reveal" style="background-image:url('${s.image_url}');"></div>`: ''}
+          <div class="hero-marquee"><span>${(escape(s.title||'BOLD')+' · ').repeat(20)}</span></div>
+        </section>`;
+
+      case 'text':
+        return `
+        <section ${anchor} class="block">
+          ${header}
+          <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
+        </section>`;
+
+      case 'image_text':
+        return `
+        <section ${anchor} class="block">
+          ${header}
+          <div class="image-text reveal">
+            ${s.image_url ? `<img src="${s.image_url}" alt="">` : `<div style="aspect-ratio:4/5; background:#e8e5de;"></div>`}
+            <div class="text">
+              <h3>${escape(s.title||'')}</h3>
+              <p>${nl2br(escape(s.body||''))}</p>
+              ${s.link_url ? `<a class="btn-bold" style="margin-top:22px; color:var(--fg); border-color:var(--fg);" href="${s.link_url}">${escape(s.link_label||'VIEW MORE')}</a>`:''}
+            </div>
+          </div>
+        </section>`;
+
+      case 'gallery':
+        const cards = (s.items||[]).map(i => `
+          <a class="card reveal" href="${i.link_url||'#'}">
+            <div class="ph" style="background-image:url('${i.image_url||''}');">
+              ${i.tag ? `<span class="card-tag">${escape(i.tag)}</span>`:''}
+            </div>
+            <h4>${escape(i.title||'')}</h4>
+            ${i.subtitle ? `<p>${escape(i.subtitle)}</p>`:''}
+            ${i.price ? `<div class="price">${escape(i.price)}</div>`:''}
+          </a>`).join('');
+        return `
+        <section ${anchor} class="block">
+          ${header}
+          ${s.body ? `<p class="reveal" style="font-family:var(--serif); max-width:620px; margin:-24px 0 40px; color:#333;">${escape(s.body)}</p>`: ''}
+          <div class="gallery-grid">${cards || `<div class="empty-note" style="grid-column:1/-1;">항목이 없습니다.</div>`}</div>
+        </section>`;
+
+      case 'cta':
+        return `
+        <section ${anchor} class="cta">
+          <div class="block-header reveal" style="justify-content:center; border-color:rgba(255,255,255,.2);">
+            <span class="block-index" style="color:rgba(255,255,255,.6);">№ ${String(idx+1).padStart(2,'0')}</span>
+            <h2 class="block-title">${escape(s.title||'')}</h2>
+          </div>
+          <p class="cta-text reveal">${nl2br(escape(s.body||''))}</p>
+          ${s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(s.link_label||'GET IN TOUCH')}</a>`:''}
+        </section>`;
+
+      default:
+        return `
+        <section ${anchor} class="block">
+          ${header}
+          <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
+        </section>`;
+    }
+  }
+
+  function escape(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+  function nl2br(s) { return s.replace(/\n/g,'<br>'); }
+
+  // 스크롤 리빌
+  function initReveal() {
+    const io = new IntersectionObserver(es => {
+      es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }});
+    }, { threshold:.12 });
+    $$('.reveal').forEach(el => io.observe(el));
+  }
+
+  // ================== 실행 ==================
+  try {
+    const [settings, sections] = await Promise.all([fetchSettings(), fetchSections()]);
+    applySettings(settings);
+    renderNav(sections);
+    const html = sections.map((s,i)=> renderSection(s,i)).join('');
+    $('#main').innerHTML = html || `<div class="empty-note">섹션이 비어있습니다. 관리자 페이지에서 추가해 주세요.</div>`;
+    initReveal();
+  } catch (e) {
+    console.error(e);
+    $('#main').innerHTML = `<div class="empty-note">데이터 로딩 실패. Supabase 설정을 확인해 주세요.</div>`;
+  }
+</script>
+</body>
+</html>
