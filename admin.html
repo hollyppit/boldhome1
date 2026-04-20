@@ -165,17 +165,11 @@
   <div class="login-box">
     <div class="brand">BOLD<small>ADMIN</small></div>
     <p class="sub">사이트 콘텐츠를 관리합니다.</p>
-    <label>이메일</label>
-    <input type="email" id="loginEmail" placeholder="admin@example.com" />
     <label>비밀번호</label>
     <input type="password" id="loginPassword" placeholder="••••••••" />
     <div style="display:flex; gap:8px; margin-top:16px;">
       <button class="btn btn-primary" id="btnLogin" style="flex:1;">로그인</button>
     </div>
-    <p style="margin-top:16px; font-size:11px; color:var(--muted); line-height:1.7;">
-      최초 1회: Supabase Dashboard → <b>Authentication → Users</b> 에서 관리자 계정을 생성하세요.<br>
-      (Email Provider · Auto-confirm 권장)
-    </p>
     <p style="margin-top:8px; font-size:11px;">
       <a href="index.html" style="color:var(--muted);">← 사이트로 돌아가기</a>
     </p>
@@ -197,8 +191,7 @@
     </a>
     <div class="side-spacer"></div>
     <div class="side-foot">
-      <div id="userEmail">—</div>
-      <div style="margin-top:8px; display:flex; gap:6px;">
+      <div style="display:flex; gap:6px;">
         <a href="index.html" target="_blank">사이트 보기</a>
         <span style="color:var(--line)">·</span>
         <a href="#" id="btnLogout" style="color:var(--accent);">로그아웃</a>
@@ -418,20 +411,20 @@ function toast(msg, type='ok') {
 }
 function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// ================== 로그인 ==================
+// ================== 로그인 (비밀번호-only) ==================
+const ADMIN_PW = 'bold2016';
+const AUTH_KEY = 'bold_admin_authed';
+
 async function checkAuth() {
   if (!configured) {
     alert('Supabase URL / Anon Key가 설정되지 않았습니다.\nadmin.html 상단의 SUPABASE_URL, SUPABASE_ANON_KEY를 먼저 입력해 주세요.');
     return false;
   }
-  const { data } = await supabase.auth.getSession();
-  return !!data.session;
+  return sessionStorage.getItem(AUTH_KEY) === '1';
 }
 async function showApp() {
   $('#loginShell').classList.add('hidden');
   $('#adminShell').classList.remove('hidden');
-  const { data } = await supabase.auth.getUser();
-  $('#userEmail').textContent = data?.user?.email || '—';
   await loadSettings();
   await loadSections();
 }
@@ -442,16 +435,18 @@ function showLogin() {
 
 $('#btnLogin').onclick = async () => {
   if (!configured) { toast('Supabase 설정 필요', 'err'); return; }
-  const email = $('#loginEmail').value.trim();
   const password = $('#loginPassword').value;
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return toast('로그인 실패: '+error.message, 'err');
+  if (password !== ADMIN_PW) return toast('비밀번호가 틀렸습니다', 'err');
+  sessionStorage.setItem(AUTH_KEY, '1');
   toast('로그인 완료');
   await showApp();
 };
-$('#btnLogout').onclick = async (e) => {
+$('#loginPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('#btnLogin').click();
+});
+$('#btnLogout').onclick = (e) => {
   e.preventDefault();
-  await supabase.auth.signOut();
+  sessionStorage.removeItem(AUTH_KEY);
   showLogin();
 };
 
