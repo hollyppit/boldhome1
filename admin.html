@@ -346,14 +346,14 @@
       </div>
     </div>
 
-    <!-- 아이템 에디터 (gallery 타입일 때 표시) -->
+    <!-- 아이템 에디터 (gallery / hero 타입일 때 표시) -->
     <div id="itemsEditor" class="hidden" style="margin-top: 24px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="margin:0; font-family:var(--mono); font-size:13px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase;">갤러리 아이템</h3>
+        <h3 id="itemsEditorLabel" style="margin:0; font-family:var(--mono); font-size:13px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase;">갤러리 아이템</h3>
         <button class="btn btn-accent" id="btnNewItem">＋ 아이템 추가</button>
       </div>
       <div id="itemList" style="margin-top:10px;"></div>
-      <p style="font-size:11px; color:var(--muted); margin:10px 0 0;">※ 아이템은 섹션 저장과 동시에 저장되지 않고, 각 아이템 편집 후 즉시 저장됩니다.</p>
+      <p id="itemsEditorHint" style="font-size:11px; color:var(--muted); margin:10px 0 0;">※ 아이템은 섹션 저장과 동시에 저장되지 않고, 각 아이템 편집 후 즉시 저장됩니다.</p>
     </div>
 
     <div class="modal-actions">
@@ -593,8 +593,17 @@ async function openSectionModal(id) {
 }
 $('#sec_type').onchange = toggleItemsEditor;
 function toggleItemsEditor() {
-  const isGallery = $('#sec_type').value === 'gallery';
-  $('#itemsEditor').classList.toggle('hidden', !(isGallery && editingSection));
+  const t = $('#sec_type').value;
+  const hasItems = t === 'gallery' || t === 'hero';
+  $('#itemsEditor').classList.toggle('hidden', !(hasItems && editingSection));
+  const label = $('#itemsEditorLabel');
+  const hint = $('#itemsEditorHint');
+  const btn = $('#btnNewItem');
+  if (label) label.textContent = t === 'hero' ? '대문 슬라이드 이미지' : '갤러리 아이템';
+  if (btn)   btn.textContent   = t === 'hero' ? '＋ 슬라이드 추가' : '＋ 아이템 추가';
+  if (hint)  hint.textContent  = t === 'hero'
+    ? '※ 대문 오른쪽에 자동 슬라이드로 표시됩니다. 2장 이상 추가하면 슬라이드쇼가 동작합니다.'
+    : '※ 아이템은 섹션 저장과 동시에 저장되지 않고, 각 아이템 편집 후 즉시 저장됩니다.';
 }
 $('#btnCloseSection').onclick = () => $('#sectionModal').classList.remove('open');
 
