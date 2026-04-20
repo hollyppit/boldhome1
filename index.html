@@ -369,29 +369,132 @@
   .sample-banner .sample-cta-ghost:hover { background:#fff; color:var(--accent); border-color:#fff; }
   .sample-banner .sample-or { opacity:.7; font-size:11px; }
 
-  /* ===== 섹션 편집 힌트 (항상 보임) ===== */
+  /* ===== 섹션 편집 힌트 (admin 모드에서만 보임) ===== */
   .edit-hint {
     position:absolute; top:14px; right:14px;
     z-index:5;
-    display:inline-flex; align-items:center; gap:6px;
+    display:none;
+    align-items:center; gap:6px;
     font-family: var(--display); font-size: 10px; letter-spacing:.2em;
     text-transform:uppercase;
-    padding: 5px 10px;
-    background: rgba(10,31,68,.88);
+    padding: 6px 12px;
+    background: var(--accent);
     color:#fff;
     border-radius: 2px;
-    opacity: .72;
     transition:.2s;
-    backdrop-filter: blur(4px);
+    cursor:pointer;
+    border:0;
   }
-  .edit-hint:hover { opacity:1; background: var(--accent); }
+  body.admin-mode .edit-hint { display:inline-flex; }
+  .edit-hint:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(255,107,26,.5); }
   .edit-hint .eh-icon { width:11px; height:11px; }
-  .edit-hint .eh-type { opacity:.75; padding-left:6px; border-left:1px solid rgba(255,255,255,.3); margin-left:2px; }
+  .edit-hint .eh-type { opacity:.85; padding-left:6px; border-left:1px solid rgba(255,255,255,.4); margin-left:2px; }
   .cta { position:relative; }
   @media (max-width: 600px) {
-    .edit-hint { font-size:9px; padding:3px 7px; top:10px; right:10px; }
+    .edit-hint { font-size:9px; padding:4px 8px; top:10px; right:10px; }
     .edit-hint .eh-type { display:none; }
   }
+
+  /* ===== 관리자 모드 상단 바 ===== */
+  .admin-bar {
+    position: fixed; top:0; left:0; right:0;
+    background: var(--fg); color:#fff;
+    z-index: 200;
+    padding: 9px 20px;
+    font-family: var(--display); font-size:12px; letter-spacing:.08em;
+    display:none; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap;
+  }
+  body.admin-mode .admin-bar { display:flex; }
+  body.admin-mode { padding-top: 40px; }
+  .admin-bar a { color:#fff; text-decoration:underline; opacity:.9; }
+  .admin-bar a:hover { color: var(--accent); opacity:1; }
+  .admin-bar .admin-exit {
+    background:var(--accent); color:#fff; border:0;
+    padding:4px 12px; font-family:inherit; letter-spacing:.1em; font-size:11px;
+    cursor:pointer; text-transform:uppercase; font-weight:700;
+  }
+  body.admin-mode { outline: 3px solid var(--accent); outline-offset: -3px; }
+  body.admin-mode .edit-hint { animation: pulseHint 1.8s ease-in-out infinite; }
+  @keyframes pulseHint {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,107,26,.4); }
+    50% { box-shadow: 0 0 0 6px rgba(255,107,26,0); }
+  }
+
+  /* ===== 인라인 편집 모달 ===== */
+  .iem-backdrop {
+    position:fixed; inset:0; background:rgba(0,0,0,.55);
+    z-index: 300; display:none; align-items:center; justify-content:center;
+    padding: 20px;
+  }
+  .iem-backdrop.open { display:flex; }
+  .iem-panel {
+    background:#fff; color: var(--fg);
+    width: 100%; max-width: 560px; max-height: 90vh; overflow:auto;
+    border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,.4);
+    display:flex; flex-direction:column;
+  }
+  .iem-header {
+    padding: 20px 22px 14px; border-bottom:1px solid #e3e5eb;
+    display:flex; align-items:center; gap:10px;
+  }
+  .iem-header h3 { margin:0; font-family:var(--display); font-size:16px; letter-spacing:.12em; text-transform:uppercase; }
+  .iem-header .iem-slug { font-size:11px; color: var(--muted); letter-spacing:.2em; margin-left:6px; }
+  .iem-close {
+    margin-left:auto; width:32px; height:32px; border-radius:50%;
+    border:1px solid #ddd; color:var(--fg);
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+  }
+  .iem-close:hover { background:#f4f4f6; }
+  .iem-body { padding: 18px 22px; display:flex; flex-direction:column; gap:14px; }
+  .iem-field label {
+    display:block; font-family:var(--display); font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color: var(--muted); margin-bottom:6px; font-weight:700;
+  }
+  .iem-field input, .iem-field textarea {
+    width:100%; padding:10px 12px; background:#f7f8fb; border:1px solid #dfe2e9;
+    border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg);
+    box-sizing:border-box;
+  }
+  .iem-field input:focus, .iem-field textarea:focus { outline:0; border-color:var(--accent); background:#fff; }
+  .iem-field textarea { min-height:100px; resize:vertical; line-height:1.6; }
+  .iem-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .iem-preview {
+    margin-top:6px; height:120px;
+    background:#f0f2f7 center/contain no-repeat; border-radius:6px;
+    border:1px solid #dfe2e9;
+  }
+  .iem-upload-row { display:flex; align-items:center; gap:10px; margin-top:6px; flex-wrap:wrap; }
+  .iem-upload-row input[type="file"] { font-size:12px; flex:1; min-width:180px; }
+  .iem-upload-row .iem-hint { font-size:11px; color:var(--muted); }
+  .iem-warn {
+    padding: 10px 12px; background:#fff4e8; border:1px solid #ffb07a;
+    color:#a14000; font-size:12px; line-height:1.6; border-radius:6px;
+  }
+  .iem-warn a { color:#a14000; font-weight:700; text-decoration:underline; }
+  .iem-footer {
+    padding: 14px 22px; border-top:1px solid #e3e5eb;
+    display:flex; align-items:center; gap:10px;
+  }
+  .iem-advanced {
+    font-size:11px; color: var(--muted); letter-spacing:.08em;
+    text-decoration:underline;
+  }
+  .iem-advanced:hover { color: var(--accent); }
+  .iem-btn {
+    padding: 10px 18px; border:1px solid var(--fg); background:#fff; color:var(--fg);
+    font-family:var(--display); font-size:12px; letter-spacing:.12em;
+    text-transform:uppercase; font-weight:700; border-radius:3px; cursor:pointer;
+  }
+  .iem-btn-primary { background:var(--fg); color:#fff; }
+  .iem-btn-primary:hover { background:var(--accent); border-color:var(--accent); }
+  .iem-toast {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+    background:var(--fg); color:#fff; padding:12px 24px;
+    border-radius:4px; font-family:var(--display); font-size:12px; letter-spacing:.1em;
+    z-index:500; opacity:0; transition:opacity .2s;
+  }
+  .iem-toast.show { opacity:1; }
+  .iem-toast.err { background:var(--accent); }
 
   /* ===== 반응형 ===== */
   @media (max-width: 900px) {
@@ -425,9 +528,16 @@
   <a href="https://github.com/hollyppit/boldhome1/blob/main/sample-data.sql" target="_blank" class="sample-cta sample-cta-ghost">sample-data.sql을 Supabase SQL Editor에서 1회 실행</a>
 </div>
 
+<!-- 관리자 모드 상단 바 (body.admin-mode일 때만 표시) -->
+<div class="admin-bar" id="adminBar">
+  <span>🔧 <b>관리자 모드</b> · 섹션 우측 상단 ✎ 버튼으로 편집하세요</span>
+  <a href="admin.html" target="_blank">고급 편집(슬라이드·아이템·설정)</a>
+  <button id="btnExitAdmin" class="admin-exit">종료</button>
+</div>
+
 <!-- 상단 유틸 -->
 <div class="top-util">
-  <a href="admin.html">관리자</a>
+  <a href="#" id="btnAdminToggle">관리자</a>
   <a href="#contact">CONTACT</a>
 </div>
 
@@ -503,6 +613,25 @@
     <span>DESIGNED WITH CARE</span>
   </div>
 </footer>
+
+<!-- 인라인 편집 모달 -->
+<div class="iem-backdrop" id="iemBackdrop">
+  <div class="iem-panel">
+    <div class="iem-header">
+      <h3 id="iemTitle">섹션 편집</h3>
+      <span class="iem-slug" id="iemSlug"></span>
+      <button class="iem-close" id="iemClose" aria-label="닫기">✕</button>
+    </div>
+    <div class="iem-body" id="iemBody"></div>
+    <div class="iem-footer">
+      <a href="admin.html" target="_blank" class="iem-advanced">고급 편집 ↗</a>
+      <div style="flex:1"></div>
+      <button class="iem-btn" id="iemCancel">취소</button>
+      <button class="iem-btn iem-btn-primary" id="iemSave">저장</button>
+    </div>
+  </div>
+</div>
+<div class="iem-toast" id="iemToast"></div>
 
 <script type="module">
   // ================== Supabase 설정 ==================
@@ -674,11 +803,11 @@
       cta:'CTA'
     }[s.type||'text'] || s.type;
     const editHint = `
-      <a class="edit-hint" href="admin.html" title="관리자 페이지 → 섹션 관리에서 '${escape(s.title||s.slug)}' 편집">
+      <button class="edit-hint" data-section-id="${escape(s.id)}" title="'${escape(s.title||s.slug)}' 편집">
         <svg class="eh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
         № ${String(idx+1).padStart(2,'0')} · ${escape(s.slug)}
         <span class="eh-type">${typeLabel}</span>
-      </a>`;
+      </button>`;
     const header = `
       <div class="block-header reveal">
         <span class="block-index">№ ${String(idx+1).padStart(2,'0')}</span>
@@ -847,20 +976,291 @@
   function escapeHTML(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   // ================== 실행 ==================
+  let SECTIONS_CACHE = [];
+  let IS_SAMPLE_MODE = false;
   try {
     const [settings, sectionsResult] = await Promise.all([fetchSettings(), fetchSections()]);
-    const sections = sectionsResult.data;
-    const isSample = sectionsResult.isSample;
+    SECTIONS_CACHE = sectionsResult.data;
+    IS_SAMPLE_MODE = sectionsResult.isSample;
     applySettings(settings);
-    renderNav(sections);
-    if (isSample) $('#sampleBanner').classList.add('on');
-    const html = sections.map((s,i)=> renderSection(s,i,isSample)).join('');
+    renderNav(SECTIONS_CACHE);
+    if (IS_SAMPLE_MODE) $('#sampleBanner').classList.add('on');
+    const html = SECTIONS_CACHE.map((s,i)=> renderSection(s,i,IS_SAMPLE_MODE)).join('');
     $('#main').innerHTML = html || `<div class="empty-note">섹션이 비어있습니다. 관리자 페이지에서 추가해 주세요.</div>`;
     initReveal();
-    initSlideshows(sections);
+    initSlideshows(SECTIONS_CACHE);
+    initAdminMode();
   } catch (e) {
     console.error(e);
     $('#main').innerHTML = `<div class="empty-note">데이터 로딩 실패. Supabase 설정을 확인해 주세요.</div>`;
+  }
+
+  // ================== 관리자 모드 (인라인 편집) ==================
+  const ADMIN_PW = 'bold2016';
+  const AUTH_KEY = 'bold_admin_authed';
+  const STORAGE_BUCKET = 'bold-media';
+
+  function iemToast(msg, type='ok') {
+    const t = $('#iemToast');
+    t.textContent = msg;
+    t.className = 'iem-toast show' + (type==='err' ? ' err' : '');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function initAdminMode() {
+    const btnToggle = $('#btnAdminToggle');
+    const btnExit = $('#btnExitAdmin');
+    if (!btnToggle) return;
+
+    btnToggle.onclick = (e) => {
+      e.preventDefault();
+      if (document.body.classList.contains('admin-mode')) return exitAdminMode();
+      enterAdminMode();
+    };
+    btnExit && (btnExit.onclick = exitAdminMode);
+
+    // 세션 유지: 직전에 로그인했으면 바로 켬
+    if (sessionStorage.getItem(AUTH_KEY) === '1') {
+      document.body.classList.add('admin-mode');
+      btnToggle.textContent = '관리자 종료';
+    }
+
+    // 모달 이벤트
+    $('#iemClose').onclick = closeIem;
+    $('#iemCancel').onclick = closeIem;
+    $('#iemSave').onclick = saveIem;
+    $('#iemBackdrop').addEventListener('click', (e) => { if (e.target.id === 'iemBackdrop') closeIem(); });
+
+    // 각 섹션 편집 버튼
+    document.querySelectorAll('.edit-hint').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!document.body.classList.contains('admin-mode')) return;
+        openIem(btn.dataset.sectionId);
+      });
+    });
+  }
+
+  function enterAdminMode() {
+    if (sessionStorage.getItem(AUTH_KEY) !== '1') {
+      const pw = prompt('관리자 비밀번호를 입력하세요\n(힌트: bold 와이파이 비번과 동일)');
+      if (pw === null) return;
+      if (pw !== ADMIN_PW) return alert('비밀번호가 틀렸습니다');
+      sessionStorage.setItem(AUTH_KEY, '1');
+    }
+    // 샘플 모드면 먼저 DB 설치 제안
+    if (IS_SAMPLE_MODE) {
+      const ok = confirm('지금 보이는 샘플 콘텐츠는 DB가 아닌 코드 샘플입니다.\n인라인 편집을 하려면 샘플을 DB에 먼저 설치해야 합니다.\n\n지금 설치할까요? (기존 DB 섹션이 있다면 교체됩니다)');
+      if (!ok) return;
+      installSampleThenReload();
+      return;
+    }
+    document.body.classList.add('admin-mode');
+    $('#btnAdminToggle').textContent = '관리자 종료';
+  }
+
+  function exitAdminMode() {
+    document.body.classList.remove('admin-mode');
+    $('#btnAdminToggle').textContent = '관리자';
+    closeIem();
+  }
+
+  // ================== 인라인 편집 모달 ==================
+  let CURRENT_EDIT = null;
+
+  function openIem(sectionId) {
+    const s = SECTIONS_CACHE.find(x => String(x.id) === String(sectionId));
+    if (!s) return iemToast('섹션을 찾을 수 없습니다','err');
+    CURRENT_EDIT = s;
+    $('#iemTitle').textContent = (s.title || s.slug || '섹션') + ' 편집';
+    $('#iemSlug').textContent = `#${s.slug} · ${s.type}`;
+
+    const isHero = s.type === 'hero';
+    const isGallery = s.type === 'gallery';
+    const showImage = !isHero && !isGallery; // hero는 슬라이드, gallery는 아이템에서 관리
+    const showLink = s.type === 'cta' || s.type === 'hero' || s.type === 'image_text';
+    const sizeHint = {
+      hero: 'hero 타입은 이미지가 <b>슬라이드 아이템</b>으로 관리됩니다',
+      text: '본문 텍스트만 표시됩니다',
+      image_text: '권장 이미지: 1200×800 · JPG 200KB 이하',
+      gallery: '갤러리 카드는 아이템에서 관리됩니다',
+      cta: '배경색이 진한 행동 유도 박스입니다'
+    }[s.type] || '';
+
+    $('#iemBody').innerHTML = `
+      <div class="iem-field">
+        <label>제목 (Title)</label>
+        <input type="text" id="iem_title" value="${escapeAttr(s.title||'')}">
+      </div>
+      <div class="iem-field">
+        <label>부제 (Subtitle)</label>
+        <input type="text" id="iem_subtitle" value="${escapeAttr(s.subtitle||'')}">
+      </div>
+      <div class="iem-field">
+        <label>본문 (Body) · 줄바꿈 그대로 적용</label>
+        <textarea id="iem_body_text">${escape(s.body||'')}</textarea>
+      </div>
+      ${showImage ? `
+      <div class="iem-field">
+        <label>이미지</label>
+        <input type="text" id="iem_image_url" value="${escapeAttr(s.image_url||'')}" placeholder="https://... 또는 아래에서 업로드">
+        <div class="iem-upload-row">
+          <input type="file" accept="image/*" id="iem_image_file">
+          <span class="iem-hint">${sizeHint}</span>
+        </div>
+        <div class="iem-preview" id="iem_image_preview"></div>
+      </div>` : `
+      <div class="iem-warn">
+        ${isHero ? '대문 슬라이드 이미지는 <a href="admin.html" target="_blank">고급 편집 페이지</a> → hero 섹션 열기 → "대문 슬라이드 이미지"에서 추가·교체하세요.' : ''}
+        ${isGallery ? '갤러리 카드는 <a href="admin.html" target="_blank">고급 편집 페이지</a> → works 섹션 열기 → "갤러리 아이템"에서 추가·교체하세요.' : ''}
+      </div>`}
+      ${showLink ? `
+      <div class="iem-grid-2">
+        <div class="iem-field">
+          <label>버튼 라벨</label>
+          <input type="text" id="iem_link_label" value="${escapeAttr(s.link_label||'')}">
+        </div>
+        <div class="iem-field">
+          <label>버튼 링크 URL</label>
+          <input type="text" id="iem_link_url" value="${escapeAttr(s.link_url||'')}" placeholder="#anchor 또는 https://...">
+        </div>
+      </div>` : ''}
+    `;
+
+    if (showImage) {
+      refreshIemPreview();
+      $('#iem_image_url').addEventListener('input', refreshIemPreview);
+      $('#iem_image_file').addEventListener('change', handleIemUpload);
+    }
+
+    $('#iemBackdrop').classList.add('open');
+  }
+
+  function closeIem() {
+    $('#iemBackdrop').classList.remove('open');
+    CURRENT_EDIT = null;
+  }
+
+  function refreshIemPreview() {
+    const url = $('#iem_image_url').value.trim();
+    const p = $('#iem_image_preview');
+    if (p) p.style.backgroundImage = url ? `url("${url}")` : '';
+  }
+
+  async function handleIemUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { iemToast('이미지 파일만 가능합니다','err'); e.target.value=''; return; }
+    if (file.size > 5 * 1024 * 1024) { iemToast('5MB를 초과합니다','err'); e.target.value=''; return; }
+    iemToast('업로드 중...');
+    try {
+      const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g,'') || 'bin';
+      const path = `sections/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+      const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(path, file, {
+        cacheControl:'3600', upsert:false, contentType: file.type || undefined
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+      $('#iem_image_url').value = data.publicUrl;
+      refreshIemPreview();
+      iemToast('업로드 완료');
+    } catch (err) {
+      iemToast('업로드 실패: ' + (err.message||err), 'err');
+    } finally {
+      e.target.value = '';
+    }
+  }
+
+  async function saveIem() {
+    const s = CURRENT_EDIT;
+    if (!s) return;
+    const payload = {
+      title: $('#iem_title').value,
+      subtitle: $('#iem_subtitle').value || null,
+      body: $('#iem_body_text').value || null,
+    };
+    const showImage = s.type !== 'hero' && s.type !== 'gallery';
+    if (showImage) payload.image_url = ($('#iem_image_url').value || null);
+    const showLink = s.type === 'cta' || s.type === 'hero' || s.type === 'image_text';
+    if (showLink) {
+      payload.link_label = $('#iem_link_label').value || null;
+      payload.link_url = $('#iem_link_url').value || null;
+    }
+    try {
+      const { error } = await supabase.from('sections').update(payload).eq('id', s.id);
+      if (error) throw error;
+      iemToast('저장 완료 · 새로고침합니다');
+      setTimeout(() => location.reload(), 700);
+    } catch (err) {
+      iemToast('저장 실패: ' + (err.message||err), 'err');
+    }
+  }
+
+  function escapeAttr(s){ return String(s??'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+  // ================== 샘플 콘텐츠 자동 설치 ==================
+  async function installSampleThenReload() {
+    iemToast('샘플 설치 중... 잠시만요');
+    try {
+      await supabase.from('items').delete().not('id','is',null);
+      await supabase.from('sections').delete().not('id','is',null);
+
+      const { data: hero, error: e1 } = await supabase.from('sections').insert({
+        slug:'hero', type:'hero', title:'BOLD', subtitle:'PORTFOLIO',
+        body:'대담한 시선으로 이야기를 풀어냅니다.\n기획과 실행 사이, 그 균형점에서 태어난 스튜디오.',
+        link_label:'WORKS 보기', link_url:'#works', sort_order:1
+      }).select().single();
+      if (e1) throw e1;
+      await supabase.from('items').insert([
+        { section_id:hero.id, title:'Campaign 01', subtitle:'BRAND IDENTITY',
+          image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1600&q=80', sort_order:1 },
+        { section_id:hero.id, title:'Editorial 02', subtitle:'ART DIRECTION',
+          image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&q=80', sort_order:2 },
+        { section_id:hero.id, title:'Poster 03', subtitle:'GRAPHIC DESIGN',
+          image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1600&q=80', sort_order:3 },
+      ]);
+      await supabase.from('sections').insert({
+        slug:'about', type:'text', title:'ABOUT', subtitle:'브랜드 소개',
+        body:'BOLD는 전주에 기반을 둔 창작 스튜디오입니다.\n\n이야기와 이미지, 태도가 만나는 지점에서 브랜드를 설계합니다. 크기가 아닌 밀도로 승부하며, 한 번의 좋은 선택이 열 개의 평범함을 이긴다고 믿습니다.',
+        sort_order:2
+      });
+      const { data: works, error: e2 } = await supabase.from('sections').insert({
+        slug:'works', type:'gallery', title:'WORKS', subtitle:'포트폴리오',
+        body:'최근 진행한 프로젝트들입니다. 썸네일을 클릭하면 상세로 이동합니다.',
+        sort_order:3
+      }).select().single();
+      if (e2) throw e2;
+      await supabase.from('items').insert([
+        { section_id:works.id, title:'Project 01', subtitle:'Brand Identity', tag:'NEW',
+          image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80', link_url:'#', sort_order:1 },
+        { section_id:works.id, title:'Project 02', subtitle:'Editorial',
+          image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80', link_url:'#', sort_order:2 },
+        { section_id:works.id, title:'Project 03', subtitle:'Campaign',
+          image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80', link_url:'#', sort_order:3 },
+        { section_id:works.id, title:'Project 04', subtitle:'Art Direction',
+          image_url:'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=800&q=80', link_url:'#', sort_order:4 },
+        { section_id:works.id, title:'Project 05', subtitle:'Poster', tag:'HOT',
+          image_url:'https://images.unsplash.com/photo-1534551767192-78b8dd45b51b?w=800&q=80', link_url:'#', sort_order:5 },
+        { section_id:works.id, title:'Project 06', subtitle:'Packaging',
+          image_url:'https://images.unsplash.com/photo-1561070791-2526d30994b8?w=800&q=80', link_url:'#', sort_order:6 },
+      ]);
+      await supabase.from('sections').insert({
+        slug:'philosophy', type:'image_text', title:'PHILOSOPHY',
+        body:'우리의 작업은 장식이 아닌 전략에서 시작합니다.\n\n간결하지만 결코 비어있지 않은, 대담하지만 결코 무례하지 않은 균형을 추구합니다. 브랜드의 본질을 찾고, 그것을 오래 남을 형태로 번역합니다.',
+        image_url:'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=1200&q=80',
+        sort_order:4
+      });
+      await supabase.from('sections').insert({
+        slug:'contact', type:'cta', title:'CONTACT', subtitle:'함께 만들어요',
+        body:'새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
+        link_label:'이메일 보내기', link_url:'mailto:hello@bold.kr',
+        sort_order:5
+      });
+      iemToast('설치 완료 · 관리자 모드로 전환됩니다');
+      setTimeout(() => location.reload(), 800);
+    } catch (err) {
+      iemToast('설치 실패: ' + (err.message||err), 'err');
+    }
   }
 </script>
 </body>
