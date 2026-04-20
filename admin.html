@@ -211,8 +211,13 @@
           <div><label>사이트명 (타이틀바)</label><input id="f_site_name" /></div>
           <div><label>로고 텍스트 (헤더 표기)</label><input id="f_site_tagline" /></div>
         </div>
-        <label>로고 이미지 URL (선택, 있으면 텍스트 대신 이미지 표기)</label>
-        <input id="f_logo_url" placeholder="https://..." />
+        <label>로고 이미지 (선택, 있으면 텍스트 대신 이미지 표기)</label>
+        <input id="f_logo_url" placeholder="https://... 또는 아래에서 업로드" />
+        <div style="display:flex; align-items:center; gap:10px; margin-top:6px; flex-wrap:wrap;">
+          <input type="file" accept="image/*" id="f_logo_file" style="font-size:12px; flex:1; min-width:200px;" />
+          <span style="font-size:11px; color:var(--muted);">권장: 가로 300~600px · 투명 PNG · 100KB 이하</span>
+        </div>
+        <div id="f_logo_preview" style="margin-top:8px; height:60px; background:var(--panel2); border:1px solid var(--line); border-radius:6px; background-size:contain; background-position:left center; background-repeat:no-repeat;"></div>
         <label>SEO 설명 (meta description)</label>
         <textarea id="f_seo_description"></textarea>
       </div>
@@ -322,8 +327,14 @@
     <textarea id="sec_body"></textarea>
     <div class="grid-2">
       <div>
-        <label>이미지 URL</label>
-        <input id="sec_image_url" placeholder="https://..." />
+        <label>이미지</label>
+        <input id="sec_image_url" placeholder="https://... 또는 아래에서 업로드" />
+        <div style="display:flex; align-items:center; gap:10px; margin-top:6px; flex-wrap:wrap;">
+          <input type="file" accept="image/*" id="sec_image_file" style="font-size:12px; flex:1; min-width:180px;" />
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px; line-height:1.6;">
+          권장: <b>hero</b> 1920×1080 · <b>image_text / 일반</b> 1200×800 · <b>cta</b> 1600×600 · JPG 300KB 이하
+        </div>
         <div class="thumb" id="sec_image_preview" style="margin-top:8px;"></div>
       </div>
       <div>
@@ -364,7 +375,11 @@
     <label>설명</label>
     <textarea id="item_description"></textarea>
     <div class="grid-2">
-      <div><label>이미지 URL</label><input id="item_image_url" />
+      <div><label>이미지</label><input id="item_image_url" placeholder="https://... 또는 아래에서 업로드" />
+        <div style="display:flex; align-items:center; gap:10px; margin-top:6px; flex-wrap:wrap;">
+          <input type="file" accept="image/*" id="item_image_file" style="font-size:12px; flex:1; min-width:180px;" />
+        </div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px;">권장: 800×800 정사각 또는 800×600 · JPG 200KB 이하</div>
         <div class="thumb" id="item_image_preview" style="margin-top:8px;"></div>
       </div>
       <div>
@@ -471,6 +486,7 @@ async function loadSettings() {
   const { data, error } = await supabase.from('site_settings').select('*').eq('id',1).single();
   if (error) return toast(error.message, 'err');
   SETTING_FIELDS.forEach(k => { const el = $(`#f_${k}`); if (el) el.value = data?.[k] ?? ''; });
+  refreshImagePreview('#f_logo_url','#f_logo_preview');
 }
 $('#btnReloadSettings').onclick = () => loadSettings();
 $('#btnSaveSettings').onclick = async () => {
@@ -586,6 +602,45 @@ function refreshImagePreview(inputSel, previewSel) {
   const url = $(inputSel).value.trim();
   $(previewSel).style.backgroundImage = url ? `url("${url}")` : '';
 }
+
+// ================== 이미지 업로드 (Supabase Storage) ==================
+const STORAGE_BUCKET = 'bold-media';
+const MAX_UPLOAD_MB = 5;
+
+async function uploadImage(file, folder) {
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const safeExt = ext || 'bin';
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${safeExt}`;
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(path, file, {
+    cacheControl: '3600', upsert: false, contentType: file.type || undefined
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+async function handleImageUpload(inputEl, urlInputSel, previewSel, folder) {
+  const file = inputEl.files?.[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('이미지 파일만 업로드 가능합니다','err'); inputEl.value=''; return; }
+  if (file.size > MAX_UPLOAD_MB * 1024 * 1024) { toast(`파일이 ${MAX_UPLOAD_MB}MB를 초과합니다`,'err'); inputEl.value=''; return; }
+  toast('업로드 중...');
+  try {
+    const url = await uploadImage(file, folder);
+    $(urlInputSel).value = url;
+    if (previewSel) refreshImagePreview(urlInputSel, previewSel);
+    toast('업로드 완료');
+  } catch (e) {
+    toast('업로드 실패: ' + (e.message || e), 'err');
+  } finally {
+    inputEl.value = '';
+  }
+}
+
+$('#f_logo_file').onchange = e => handleImageUpload(e.target, '#f_logo_url', '#f_logo_preview', 'logo');
+$('#f_logo_url').oninput = () => refreshImagePreview('#f_logo_url','#f_logo_preview');
+$('#sec_image_file').onchange = e => handleImageUpload(e.target, '#sec_image_url', '#sec_image_preview', 'sections');
+$('#item_image_file').onchange = e => handleImageUpload(e.target, '#item_image_url', '#item_image_preview', 'items');
 
 $('#btnSaveSection').onclick = async () => {
   const payload = {
