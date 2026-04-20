@@ -348,6 +348,51 @@
   .loading { opacity:.4; pointer-events:none; }
   .empty-note { text-align:center; font-family:var(--serif); color:var(--muted); padding: 60px 0; }
 
+  /* ===== 샘플 모드 배너 ===== */
+  .sample-banner {
+    display:none;
+    background: var(--accent); color:#fff;
+    font-family: var(--display); font-size: 12px; letter-spacing:.05em;
+    padding: 11px 20px;
+    text-align:center;
+    align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;
+  }
+  .sample-banner.on { display:flex; }
+  .sample-banner b { font-weight: 900; }
+  .sample-banner .sample-cta {
+    background:#fff; color: var(--fg); padding: 4px 12px; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase; font-size:11px;
+    transition:.15s;
+  }
+  .sample-banner .sample-cta:hover { background: var(--fg); color:#fff; }
+  .sample-banner .sample-cta-ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.6); }
+  .sample-banner .sample-cta-ghost:hover { background:#fff; color:var(--accent); border-color:#fff; }
+  .sample-banner .sample-or { opacity:.7; font-size:11px; }
+
+  /* ===== 섹션 편집 힌트 (항상 보임) ===== */
+  .edit-hint {
+    position:absolute; top:14px; right:14px;
+    z-index:5;
+    display:inline-flex; align-items:center; gap:6px;
+    font-family: var(--display); font-size: 10px; letter-spacing:.2em;
+    text-transform:uppercase;
+    padding: 5px 10px;
+    background: rgba(10,31,68,.88);
+    color:#fff;
+    border-radius: 2px;
+    opacity: .72;
+    transition:.2s;
+    backdrop-filter: blur(4px);
+  }
+  .edit-hint:hover { opacity:1; background: var(--accent); }
+  .edit-hint .eh-icon { width:11px; height:11px; }
+  .edit-hint .eh-type { opacity:.75; padding-left:6px; border-left:1px solid rgba(255,255,255,.3); margin-left:2px; }
+  .cta { position:relative; }
+  @media (max-width: 600px) {
+    .edit-hint { font-size:9px; padding:3px 7px; top:10px; right:10px; }
+    .edit-hint .eh-type { display:none; }
+  }
+
   /* ===== 반응형 ===== */
   @media (max-width: 900px) {
     .nav { gap:20px; font-size:11px; flex-wrap:wrap; padding: 10px 14px 18px; }
@@ -371,6 +416,14 @@
 </style>
 </head>
 <body>
+
+<!-- 샘플 모드 배너 (DB 비었을 때만 on 클래스 추가됨) -->
+<div class="sample-banner" id="sampleBanner">
+  <span>📦 <b>샘플 콘텐츠</b>가 표시되고 있습니다 — Supabase에 실제 섹션이 없어요.</span>
+  <a href="admin.html" class="sample-cta">관리자 페이지에서 편집 →</a>
+  <span class="sample-or">또는</span>
+  <a href="https://github.com/hollyppit/boldhome1/blob/main/sample-data.sql" target="_blank" class="sample-cta sample-cta-ghost">sample-data.sql을 Supabase SQL Editor에서 1회 실행</a>
+</div>
 
 <!-- 상단 유틸 -->
 <div class="top-util">
@@ -480,20 +533,21 @@
     return data;
   }
   async function fetchSections() {
-    if (!useSupabase) return defaultSections();
+    if (!useSupabase) return { data: defaultSections(), isSample: true };
     const { data, error } = await supabase
       .from('sections')
       .select('*, items(*)')
       .eq('is_visible', true)
       .order('sort_order', { ascending: true });
-    if (error) { console.warn(error); return defaultSections(); }
+    if (error) { console.warn(error); return { data: defaultSections(), isSample: true }; }
+    if (!data || data.length === 0) return { data: defaultSections(), isSample: true };
     // items 정렬
     data.forEach(s => {
       if (s.items) s.items = s.items
         .filter(i => i.is_visible !== false)
         .sort((a,b)=> (a.sort_order||0) - (b.sort_order||0));
     });
-    return data;
+    return { data, isSample: false };
   }
 
   // 기본 샘플 (Supabase 미설정 시)
@@ -513,39 +567,55 @@
   function defaultSections() {
     return [
       { id:'s1', slug:'hero', type:'hero', sort_order:1,
-        title:'BOLD', subtitle:'대담한 브랜드, 새로운 감각',
-        body:'우리는 당신의 이야기를 대담하게 풀어냅니다. 섬세하게 다듬어진 기획과 과감한 실행 사이에서 BOLD는 태어났습니다.',
-        image_url:'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=900',
-        link_label:'BROWSE', link_url:'#about', extra:{}, items:[] },
+        title:'BOLD', subtitle:'PORTFOLIO',
+        body:'대담한 시선으로 이야기를 풀어냅니다.\n기획과 실행 사이, 그 균형점에서 태어난 스튜디오.',
+        link_label:'WORKS 보기', link_url:'#works', extra:{},
+        items:[
+          { id:'h1', title:'Campaign 01', subtitle:'BRAND IDENTITY',
+            image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1600&q=80',
+            sort_order:1 },
+          { id:'h2', title:'Editorial 02', subtitle:'ART DIRECTION',
+            image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&q=80',
+            sort_order:2 },
+          { id:'h3', title:'Poster 03', subtitle:'GRAPHIC DESIGN',
+            image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1600&q=80',
+            sort_order:3 },
+        ]},
       { id:'s2', slug:'about', type:'text', sort_order:2,
         title:'ABOUT', subtitle:'브랜드 소개',
-        body:'BOLD는 전주에 기반을 둔 창작 스튜디오입니다.\n\n우리는 이야기와 이미지, 그리고 태도가 만나는 지점에서 브랜드를 설계합니다. 크기가 아니라 밀도로 승부하며, 한 번의 좋은 선택이 열 개의 평범함을 이긴다고 믿습니다.',
+        body:'BOLD는 전주에 기반을 둔 창작 스튜디오입니다.\n\n이야기와 이미지, 태도가 만나는 지점에서 브랜드를 설계합니다. 크기가 아닌 밀도로 승부하며, 한 번의 좋은 선택이 열 개의 평범함을 이긴다고 믿습니다.',
         items:[] },
       { id:'s3', slug:'works', type:'gallery', sort_order:3,
-        title:'WORKS', subtitle:'우리의 작업',
-        body:'최근 진행한 프로젝트를 소개합니다.',
+        title:'WORKS', subtitle:'포트폴리오',
+        body:'최근 진행한 프로젝트들입니다. 썸네일을 클릭하면 상세로 이동합니다.',
         items:[
-          { id:'i1', title:'Project 01', subtitle:'Brand Identity', tag:'NEW',
-            image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600',
-            link_url:'#' },
-          { id:'i2', title:'Project 02', subtitle:'Editorial',
-            image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600',
-            link_url:'#' },
-          { id:'i3', title:'Project 03', subtitle:'Campaign',
-            image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600',
-            link_url:'#' },
-          { id:'i4', title:'Project 04', subtitle:'Art Direction',
-            image_url:'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=600',
-            link_url:'#' },
+          { id:'w1', title:'Project 01', subtitle:'Brand Identity', tag:'NEW',
+            image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80',
+            link_url:'#', sort_order:1 },
+          { id:'w2', title:'Project 02', subtitle:'Editorial',
+            image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80',
+            link_url:'#', sort_order:2 },
+          { id:'w3', title:'Project 03', subtitle:'Campaign',
+            image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80',
+            link_url:'#', sort_order:3 },
+          { id:'w4', title:'Project 04', subtitle:'Art Direction',
+            image_url:'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=800&q=80',
+            link_url:'#', sort_order:4 },
+          { id:'w5', title:'Project 05', subtitle:'Poster', tag:'HOT',
+            image_url:'https://images.unsplash.com/photo-1534551767192-78b8dd45b51b?w=800&q=80',
+            link_url:'#', sort_order:5 },
+          { id:'w6', title:'Project 06', subtitle:'Packaging',
+            image_url:'https://images.unsplash.com/photo-1561070791-2526d30994b8?w=800&q=80',
+            link_url:'#', sort_order:6 },
         ]},
-      { id:'s4', slug:'feature', type:'image_text', sort_order:4,
+      { id:'s4', slug:'philosophy', type:'image_text', sort_order:4,
         title:'PHILOSOPHY',
-        body:'우리의 작업은 장식이 아닌 전략에서 시작합니다. 간결하지만 결코 비어있지 않은, 대담하지만 결코 무례하지 않은 균형을 추구합니다.',
-        image_url:'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=800',
-      },
+        body:'우리의 작업은 장식이 아닌 전략에서 시작합니다.\n\n간결하지만 결코 비어있지 않은, 대담하지만 결코 무례하지 않은 균형을 추구합니다. 브랜드의 본질을 찾고, 그것을 오래 남을 형태로 번역합니다.',
+        image_url:'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=1200&q=80',
+        items:[] },
       { id:'s5', slug:'contact', type:'cta', sort_order:5,
         title:'CONTACT', subtitle:'함께 만들어요',
-        body:'새로운 협업 제안이나 문의를 환영합니다.',
+        body:'새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
         link_label:'이메일 보내기', link_url:'mailto:hello@bold.kr',
         items:[] },
     ];
@@ -594,8 +664,21 @@
     });
   }
 
-  function renderSection(s, idx) {
+  function renderSection(s, idx, isSample) {
     const anchor = `id="${s.slug}"`;
+    const typeLabel = {
+      hero:'대문',
+      text:'본문',
+      image_text:'이미지+글',
+      gallery:'갤러리',
+      cta:'CTA'
+    }[s.type||'text'] || s.type;
+    const editHint = `
+      <a class="edit-hint" href="admin.html" title="관리자 페이지 → 섹션 관리에서 '${escape(s.title||s.slug)}' 편집">
+        <svg class="eh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        № ${String(idx+1).padStart(2,'0')} · ${escape(s.slug)}
+        <span class="eh-type">${typeLabel}</span>
+      </a>`;
     const header = `
       <div class="block-header reveal">
         <span class="block-index">№ ${String(idx+1).padStart(2,'0')}</span>
@@ -635,6 +718,7 @@
         }
         return `
         <section ${anchor} class="hero" style="${(s.image_url || heroSlides.length) ? '': 'background:linear-gradient(180deg,var(--bg),var(--bg-soft));'}">
+          ${editHint}
           <div>
             <h1 class="hero-title reveal">${escape(s.title||'')}${s.subtitle ? `<br><em>${escape(s.subtitle)}</em>` : ''}</h1>
             <p class="hero-sub reveal"><small>INTRO</small>${nl2br(escape(s.body||''))}</p>
@@ -648,6 +732,7 @@
       case 'text':
         return `
         <section ${anchor} class="block">
+          ${editHint}
           ${header}
           <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
         </section>`;
@@ -655,6 +740,7 @@
       case 'image_text':
         return `
         <section ${anchor} class="block">
+          ${editHint}
           ${header}
           <div class="image-text reveal">
             ${s.image_url ? `<img src="${s.image_url}" alt="">` : `<div style="aspect-ratio:4/5; background:var(--bg-soft);"></div>`}
@@ -678,6 +764,7 @@
           </a>`).join('');
         return `
         <section ${anchor} class="block">
+          ${editHint}
           ${header}
           ${s.body ? `<p class="reveal" style="font-family:var(--serif); max-width:620px; margin:-24px 0 40px; color:#333;">${escape(s.body)}</p>`: ''}
           <div class="gallery-grid">${cards || `<div class="empty-note" style="grid-column:1/-1;">항목이 없습니다.</div>`}</div>
@@ -686,6 +773,7 @@
       case 'cta':
         return `
         <section ${anchor} class="cta">
+          ${editHint}
           <div class="block-header reveal" style="justify-content:center; border-color:rgba(255,255,255,.2);">
             <span class="block-index" style="color:rgba(255,255,255,.6);">№ ${String(idx+1).padStart(2,'0')}</span>
             <h2 class="block-title">${escape(s.title||'')}</h2>
@@ -697,6 +785,7 @@
       default:
         return `
         <section ${anchor} class="block">
+          ${editHint}
           ${header}
           <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
         </section>`;
@@ -759,10 +848,13 @@
 
   // ================== 실행 ==================
   try {
-    const [settings, sections] = await Promise.all([fetchSettings(), fetchSections()]);
+    const [settings, sectionsResult] = await Promise.all([fetchSettings(), fetchSections()]);
+    const sections = sectionsResult.data;
+    const isSample = sectionsResult.isSample;
     applySettings(settings);
     renderNav(sections);
-    const html = sections.map((s,i)=> renderSection(s,i)).join('');
+    if (isSample) $('#sampleBanner').classList.add('on');
+    const html = sections.map((s,i)=> renderSection(s,i,isSample)).join('');
     $('#main').innerHTML = html || `<div class="empty-note">섹션이 비어있습니다. 관리자 페이지에서 추가해 주세요.</div>`;
     initReveal();
     initSlideshows(sections);
