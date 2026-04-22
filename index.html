@@ -975,6 +975,11 @@
   }
   function escapeHTML(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+  // ================== 관리자 상수 (TDZ 방지를 위해 실행 블록보다 위) ==================
+  const ADMIN_PW = 'bold2016';
+  const AUTH_KEY = 'bold_admin_authed';
+  const STORAGE_BUCKET = 'bold-media';
+
   // ================== 실행 ==================
   let SECTIONS_CACHE = [];
   let IS_SAMPLE_MODE = false;
@@ -996,10 +1001,6 @@
   }
 
   // ================== 관리자 모드 (인라인 편집) ==================
-  const ADMIN_PW = 'bold2016';
-  const AUTH_KEY = 'bold_admin_authed';
-  const STORAGE_BUCKET = 'bold-media';
-
   function iemToast(msg, type='ok') {
     const t = $('#iemToast');
     t.textContent = msg;
