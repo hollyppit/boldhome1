@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>BOLD · 관리자</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600;900&family=Nanum+Gothic:wght@400;700;800&family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Sunflower:wght@300;500;700&family=Gugi&family=Yeon+Sung&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Single+Day&family=Poor+Story&family=Hi+Melody&family=East+Sea+Dokdo&family=Gothic+A1:wght@400;500;700;900&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Hahmlet:wght@400;500;700;900&family=Gowun+Batang:wght@400;700&family=Cute+Font&family=Kirang+Haerang&display=swap" rel="stylesheet" />
 <style>
   :root {
     --bg:#0f0f10; --panel:#17171a; --panel2:#1f1f23; --line:#2a2a30;
@@ -417,12 +417,7 @@
       <div class="grid-2">
         <div>
           <label>제목 폰트</label>
-          <select id="sec_title_font">
-            <option value="">기본 (테마)</option>
-            <option value="display">디스플레이 (Archivo · 영문 굵은)</option>
-            <option value="serif">세리프 (Noto Serif KR)</option>
-            <option value="sans">산세리프 (Noto Sans KR)</option>
-          </select>
+          <select id="sec_title_font" class="font-pick"></select>
         </div>
         <div>
           <label>제목 크기</label>
@@ -442,12 +437,7 @@
       <div class="grid-2" style="margin-top:6px;">
         <div>
           <label>본문 폰트</label>
-          <select id="sec_body_font">
-            <option value="">기본 (테마)</option>
-            <option value="display">디스플레이 (Archivo · 영문 굵은)</option>
-            <option value="serif">세리프 (Noto Serif KR)</option>
-            <option value="sans">산세리프 (Noto Sans KR)</option>
-          </select>
+          <select id="sec_body_font" class="font-pick"></select>
         </div>
         <div>
           <label>본문 크기</label>
@@ -546,6 +536,87 @@ function toast(msg, type='ok') {
   t._t = setTimeout(()=> t.style.display='none', 2600);
 }
 function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ================== 폰트 카탈로그 (index.html과 동일) ==================
+const FONT_FAMILY_MAP = {
+  'display':         "'Archivo','Noto Serif KR',serif",
+  'serif':           "'Noto Serif KR',serif",
+  'sans':            "'Noto Sans KR','Archivo',sans-serif",
+  'nanum-gothic':    "'Nanum Gothic',sans-serif",
+  'nanum-myeongjo':  "'Nanum Myeongjo',serif",
+  'gothic-a1':       "'Gothic A1',sans-serif",
+  'ibm-plex-sans-kr':"'IBM Plex Sans KR',sans-serif",
+  'sunflower':       "'Sunflower',sans-serif",
+  'hahmlet':         "'Hahmlet',serif",
+  'gowun-batang':    "'Gowun Batang',serif",
+  'black-han-sans':  "'Black Han Sans',sans-serif",
+  'do-hyeon':        "'Do Hyeon',sans-serif",
+  'jua':             "'Jua',sans-serif",
+  'gugi':            "'Gugi',cursive",
+  'yeon-sung':       "'Yeon Sung',cursive",
+  'nanum-pen':       "'Nanum Pen Script',cursive",
+  'nanum-brush':     "'Nanum Brush Script',cursive",
+  'gaegu':           "'Gaegu',cursive",
+  'gamja-flower':    "'Gamja Flower',cursive",
+  'single-day':      "'Single Day',cursive",
+  'poor-story':      "'Poor Story',cursive",
+  'hi-melody':       "'Hi Melody',cursive",
+  'east-sea-dokdo':  "'East Sea Dokdo',cursive",
+  'cute-font':       "'Cute Font',cursive",
+  'kirang-haerang':  "'Kirang Haerang',cursive",
+};
+const FONT_GROUPS = [
+  { label: '사이트 기본', items: [
+    { value: 'display', label: 'BOLD 디스플레이 (Archivo · 영문)' },
+    { value: 'serif',   label: 'BOLD 세리프 (Noto Serif KR)' },
+    { value: 'sans',    label: 'BOLD 산세리프 (Noto Sans KR)' },
+  ]},
+  { label: '본문체 · 산세리프', items: [
+    { value: 'nanum-gothic',     label: '나눔고딕' },
+    { value: 'gothic-a1',        label: 'Gothic A1' },
+    { value: 'ibm-plex-sans-kr', label: 'IBM Plex Sans KR' },
+    { value: 'sunflower',        label: 'Sunflower' },
+  ]},
+  { label: '본문체 · 세리프 / 명조', items: [
+    { value: 'nanum-myeongjo',   label: '나눔명조' },
+    { value: 'hahmlet',          label: 'Hahmlet' },
+    { value: 'gowun-batang',     label: '고운바탕 Gowun Batang' },
+  ]},
+  { label: '제목체 · 임팩트', items: [
+    { value: 'black-han-sans',   label: '블랙한산스 Black Han Sans' },
+    { value: 'do-hyeon',         label: '도현체 Do Hyeon' },
+    { value: 'jua',              label: '주아체 Jua' },
+    { value: 'gugi',             label: '구기체 Gugi' },
+    { value: 'yeon-sung',        label: '연성체 Yeon Sung' },
+  ]},
+  { label: '손글씨', items: [
+    { value: 'nanum-pen',        label: '나눔손글씨 펜 Nanum Pen' },
+    { value: 'nanum-brush',      label: '나눔손글씨 붓 Nanum Brush' },
+    { value: 'gaegu',            label: '개구쟁이 Gaegu' },
+    { value: 'gamja-flower',     label: '감자꽃 Gamja Flower' },
+    { value: 'single-day',       label: 'Single Day' },
+    { value: 'poor-story',       label: '푸어스토리 Poor Story' },
+    { value: 'hi-melody',        label: 'Hi Melody' },
+    { value: 'east-sea-dokdo',   label: '동해독도 East Sea Dokdo' },
+    { value: 'cute-font',        label: '큐트 Cute Font' },
+    { value: 'kirang-haerang',   label: '기랑해랑 Kirang Haerang' },
+  ]},
+];
+function populateFontSelect(selectEl) {
+  if (!selectEl || selectEl.dataset.populated === '1') return;
+  let html = '<option value="">기본 (테마)</option>';
+  FONT_GROUPS.forEach(g => {
+    html += `<optgroup label="${g.label}">`;
+    g.items.forEach(o => {
+      const fam = FONT_FAMILY_MAP[o.value] || '';
+      html += `<option value="${o.value}" style="font-family:${fam};">${o.label}</option>`;
+    });
+    html += `</optgroup>`;
+  });
+  selectEl.innerHTML = html;
+  selectEl.dataset.populated = '1';
+}
+document.querySelectorAll('select.font-pick').forEach(populateFontSelect);
 
 // ================== 로그인 (비밀번호-only) ==================
 const ADMIN_PW = 'bold2016';

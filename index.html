@@ -9,7 +9,7 @@
 <!-- 원본 쇼핑몰의 골격을 참고한 자체 레이아웃: 헤더 · 사이드드로어 · 메인 · 푸터 -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600;900&family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Gothic:wght@400;700;800&family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Sunflower:wght@300;500;700&family=Gugi&family=Yeon+Sung&family=Gaegu:wght@400;700&family=Gamja+Flower&family=Single+Day&family=Poor+Story&family=Hi+Melody&family=East+Sea+Dokdo&family=Gothic+A1:wght@400;500;700;900&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Hahmlet:wght@400;500;700;900&family=Gowun+Batang:wght@400;700&family=Cute+Font&family=Kirang+Haerang&display=swap" rel="stylesheet" />
 
 <style>
   :root {
@@ -930,21 +930,71 @@
     });
   }
 
-  function buildTypoStyle(extra) {
-    const ex = extra || {};
-    const parts = [];
-    if (ex.title_font && ['display','serif','sans'].includes(ex.title_font)) parts.push(`--title-font:var(--${ex.title_font})`);
-    if (ex.title_scale && Number(ex.title_scale) > 0) parts.push(`--title-scale:${Number(ex.title_scale)}`);
-    if (ex.body_font && ['display','serif','sans'].includes(ex.body_font)) parts.push(`--body-font:var(--${ex.body_font})`);
-    if (ex.body_scale && Number(ex.body_scale) > 0) parts.push(`--body-scale:${Number(ex.body_scale)}`);
-    return parts.join(';');
-  }
-
-  const TYPO_FONTS = [
-    { value: '',        label: '기본 (테마)' },
-    { value: 'display', label: '디스플레이 (Archivo · 영문 굵은)' },
-    { value: 'serif',   label: '세리프 (Noto Serif KR)' },
-    { value: 'sans',    label: '산세리프 (Noto Sans KR)' },
+  // 폰트 카탈로그: value → CSS font-family 문자열
+  const FONT_FAMILY_MAP = {
+    'display':         "'Archivo','Noto Serif KR',serif",
+    'serif':           "'Noto Serif KR',serif",
+    'sans':            "'Noto Sans KR','Archivo',sans-serif",
+    'nanum-gothic':    "'Nanum Gothic',sans-serif",
+    'nanum-myeongjo':  "'Nanum Myeongjo',serif",
+    'gothic-a1':       "'Gothic A1',sans-serif",
+    'ibm-plex-sans-kr':"'IBM Plex Sans KR',sans-serif",
+    'sunflower':       "'Sunflower',sans-serif",
+    'hahmlet':         "'Hahmlet',serif",
+    'gowun-batang':    "'Gowun Batang',serif",
+    'black-han-sans':  "'Black Han Sans',sans-serif",
+    'do-hyeon':        "'Do Hyeon',sans-serif",
+    'jua':             "'Jua',sans-serif",
+    'gugi':            "'Gugi',cursive",
+    'yeon-sung':       "'Yeon Sung',cursive",
+    'nanum-pen':       "'Nanum Pen Script',cursive",
+    'nanum-brush':     "'Nanum Brush Script',cursive",
+    'gaegu':           "'Gaegu',cursive",
+    'gamja-flower':    "'Gamja Flower',cursive",
+    'single-day':      "'Single Day',cursive",
+    'poor-story':      "'Poor Story',cursive",
+    'hi-melody':       "'Hi Melody',cursive",
+    'east-sea-dokdo':  "'East Sea Dokdo',cursive",
+    'cute-font':       "'Cute Font',cursive",
+    'kirang-haerang':  "'Kirang Haerang',cursive",
+  };
+  // UI용 그룹 + 라벨
+  const FONT_GROUPS = [
+    { label: '사이트 기본', items: [
+      { value: 'display', label: 'BOLD 디스플레이 (Archivo · 영문)' },
+      { value: 'serif',   label: 'BOLD 세리프 (Noto Serif KR)' },
+      { value: 'sans',    label: 'BOLD 산세리프 (Noto Sans KR)' },
+    ]},
+    { label: '본문체 · 산세리프', items: [
+      { value: 'nanum-gothic',     label: '나눔고딕' },
+      { value: 'gothic-a1',        label: 'Gothic A1' },
+      { value: 'ibm-plex-sans-kr', label: 'IBM Plex Sans KR' },
+      { value: 'sunflower',        label: 'Sunflower' },
+    ]},
+    { label: '본문체 · 세리프 / 명조', items: [
+      { value: 'nanum-myeongjo',   label: '나눔명조' },
+      { value: 'hahmlet',          label: 'Hahmlet' },
+      { value: 'gowun-batang',     label: '고운바탕 Gowun Batang' },
+    ]},
+    { label: '제목체 · 임팩트', items: [
+      { value: 'black-han-sans',   label: '블랙한산스 Black Han Sans' },
+      { value: 'do-hyeon',         label: '도현체 Do Hyeon' },
+      { value: 'jua',              label: '주아체 Jua' },
+      { value: 'gugi',             label: '구기체 Gugi' },
+      { value: 'yeon-sung',        label: '연성체 Yeon Sung' },
+    ]},
+    { label: '손글씨', items: [
+      { value: 'nanum-pen',        label: '나눔손글씨 펜 Nanum Pen' },
+      { value: 'nanum-brush',      label: '나눔손글씨 붓 Nanum Brush' },
+      { value: 'gaegu',            label: '개구쟁이 Gaegu' },
+      { value: 'gamja-flower',     label: '감자꽃 Gamja Flower' },
+      { value: 'single-day',       label: 'Single Day' },
+      { value: 'poor-story',       label: '푸어스토리 Poor Story' },
+      { value: 'hi-melody',        label: 'Hi Melody' },
+      { value: 'east-sea-dokdo',   label: '동해독도 East Sea Dokdo' },
+      { value: 'cute-font',        label: '큐트 Cute Font' },
+      { value: 'kirang-haerang',   label: '기랑해랑 Kirang Haerang' },
+    ]},
   ];
   const TYPO_SCALES = [
     { value: '',     label: '기본 (100%)' },
@@ -957,10 +1007,28 @@
     { value: '1.75', label: '강조 (175%)' },
     { value: '2',    label: '최대 (200%)' },
   ];
+
+  function buildTypoStyle(extra) {
+    const ex = extra || {};
+    const parts = [];
+    if (ex.title_font && FONT_FAMILY_MAP[ex.title_font]) parts.push(`--title-font:${FONT_FAMILY_MAP[ex.title_font]}`);
+    if (ex.title_scale && Number(ex.title_scale) > 0)    parts.push(`--title-scale:${Number(ex.title_scale)}`);
+    if (ex.body_font && FONT_FAMILY_MAP[ex.body_font])   parts.push(`--body-font:${FONT_FAMILY_MAP[ex.body_font]}`);
+    if (ex.body_scale && Number(ex.body_scale) > 0)      parts.push(`--body-scale:${Number(ex.body_scale)}`);
+    return parts.join(';');
+  }
+
   function renderFontSelect(id, current) {
     const cur = current || '';
+    const sel = (v) => String(cur) === v ? ' selected' : '';
+    const groups = FONT_GROUPS.map(g => `
+      <optgroup label="${g.label}">
+        ${g.items.map(o => `<option value="${o.value}" style="font-family:${FONT_FAMILY_MAP[o.value]};"${sel(o.value)}>${o.label}</option>`).join('')}
+      </optgroup>
+    `).join('');
     return `<select id="${id}" style="width:100%; padding:10px 12px; background:#f7f8fb; border:1px solid #dfe2e9; border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg); box-sizing:border-box;">
-      ${TYPO_FONTS.map(o => `<option value="${o.value}"${String(cur)===o.value ? ' selected':''}>${o.label}</option>`).join('')}
+      <option value=""${sel('')}>기본 (테마)</option>
+      ${groups}
     </select>`;
   }
   function renderScaleSelect(id, current) {
