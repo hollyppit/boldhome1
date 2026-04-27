@@ -44,7 +44,7 @@ create index if not exists inquiries_created_at_idx on inquiries(created_at desc
 -- 헬퍼: 관리자 비밀번호 검증 (내부용, anon에 grant하지 않음)
 -- ─────────────────────────────────────────────────────────────────────
 create or replace function _check_admin_pw(p_pw text) returns boolean
-language sql security definer set search_path = public
+language sql security definer set search_path = public, extensions
 as $$
   select exists (
     select 1 from app_secrets
@@ -59,7 +59,7 @@ $$;
 create or replace function submit_inquiry(
   p_title text, p_body text, p_contact text, p_edit_pw text
 ) returns bigint
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   new_id bigint;
@@ -88,7 +88,7 @@ returns table (
   id bigint, title text, body text, contact text,
   is_read boolean, created_at timestamptz, updated_at timestamptz
 )
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 begin
   return query
@@ -106,7 +106,7 @@ create or replace function update_inquiry_by_user(
   p_id bigint, p_edit_pw text,
   p_title text, p_body text, p_contact text
 ) returns boolean
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   affected int;
@@ -134,7 +134,7 @@ $$;
 -- ─────────────────────────────────────────────────────────────────────
 create or replace function delete_inquiry_by_user(p_id bigint, p_edit_pw text)
 returns boolean
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   affected int;
@@ -155,7 +155,7 @@ returns table (
   id bigint, title text, body text, contact text,
   is_read boolean, created_at timestamptz, updated_at timestamptz
 )
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 begin
   if not _check_admin_pw(p_admin_pw) then
@@ -173,7 +173,7 @@ $$;
 -- ─────────────────────────────────────────────────────────────────────
 create or replace function mark_inquiry_read(p_admin_pw text, p_id bigint, p_is_read boolean default true)
 returns boolean
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   affected int;
@@ -192,7 +192,7 @@ $$;
 -- ─────────────────────────────────────────────────────────────────────
 create or replace function delete_inquiry(p_admin_pw text, p_id bigint)
 returns boolean
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 declare
   affected int;
@@ -211,7 +211,7 @@ $$;
 -- ─────────────────────────────────────────────────────────────────────
 create or replace function change_admin_pw(p_old_pw text, p_new_pw text)
 returns boolean
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 begin
   if not _check_admin_pw(p_old_pw) then
