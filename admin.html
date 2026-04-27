@@ -409,6 +409,63 @@
       </div>
     </div>
 
+    <!-- 타이포그래피 (이 섹션만 적용) -->
+    <div style="border-top:1px dashed var(--line); padding-top:14px; margin-top:18px;">
+      <h3 style="margin:0 0 12px; font-family:var(--mono); font-weight:700; letter-spacing:.08em; font-size:13px; text-transform:uppercase; color:var(--muted);">
+        타이포그래피 <small style="color:#666; font-weight:400; letter-spacing:0; text-transform:none;">— 이 섹션에만 적용 (비워두면 사이트 기본 사용)</small>
+      </h3>
+      <div class="grid-2">
+        <div>
+          <label>제목 폰트</label>
+          <select id="sec_title_font">
+            <option value="">기본 (테마)</option>
+            <option value="display">디스플레이 (Archivo · 영문 굵은)</option>
+            <option value="serif">세리프 (Noto Serif KR)</option>
+            <option value="sans">산세리프 (Noto Sans KR)</option>
+          </select>
+        </div>
+        <div>
+          <label>제목 크기</label>
+          <select id="sec_title_scale">
+            <option value="">기본 (100%)</option>
+            <option value="0.75">작게 (75%)</option>
+            <option value="0.9">약간 작게 (90%)</option>
+            <option value="1">보통 (100%)</option>
+            <option value="1.15">약간 크게 (115%)</option>
+            <option value="1.3">크게 (130%)</option>
+            <option value="1.5">더 크게 (150%)</option>
+            <option value="1.75">강조 (175%)</option>
+            <option value="2">최대 (200%)</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:6px;">
+        <div>
+          <label>본문 폰트</label>
+          <select id="sec_body_font">
+            <option value="">기본 (테마)</option>
+            <option value="display">디스플레이 (Archivo · 영문 굵은)</option>
+            <option value="serif">세리프 (Noto Serif KR)</option>
+            <option value="sans">산세리프 (Noto Sans KR)</option>
+          </select>
+        </div>
+        <div>
+          <label>본문 크기</label>
+          <select id="sec_body_scale">
+            <option value="">기본 (100%)</option>
+            <option value="0.75">작게 (75%)</option>
+            <option value="0.9">약간 작게 (90%)</option>
+            <option value="1">보통 (100%)</option>
+            <option value="1.15">약간 크게 (115%)</option>
+            <option value="1.3">크게 (130%)</option>
+            <option value="1.5">더 크게 (150%)</option>
+            <option value="1.75">강조 (175%)</option>
+            <option value="2">최대 (200%)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <!-- 아이템 에디터 (gallery / hero 타입일 때 표시) -->
     <div id="itemsEditor" class="hidden" style="margin-top: 24px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -770,6 +827,11 @@ async function openSectionModal(id) {
     $('#sec_link_label').value = s.link_label || '';
     $('#sec_link_url').value = s.link_url || '';
     $('#sec_is_visible').value = s.is_visible === false ? 'false' : 'true';
+    const ex = s.extra || {};
+    $('#sec_title_font').value  = ex.title_font  || '';
+    $('#sec_title_scale').value = ex.title_scale != null ? String(ex.title_scale) : '';
+    $('#sec_body_font').value   = ex.body_font   || '';
+    $('#sec_body_scale').value  = ex.body_scale  != null ? String(ex.body_scale)  : '';
     $('#btnDeleteSection').classList.remove('hidden');
     refreshImagePreview('#sec_image_url', '#sec_image_preview');
     await loadItems(id);
@@ -779,6 +841,7 @@ async function openSectionModal(id) {
     ['slug','title','subtitle','body','image_url','link_label','link_url'].forEach(k => $(`#sec_${k}`).value = '');
     $('#sec_type').value = 'text';
     $('#sec_is_visible').value = 'true';
+    ['title_font','title_scale','body_font','body_scale'].forEach(k => $(`#sec_${k}`).value = '');
     $('#btnDeleteSection').classList.add('hidden');
     refreshImagePreview('#sec_image_url', '#sec_image_preview');
     $('#itemsEditor').classList.add('hidden');
@@ -847,6 +910,16 @@ $('#sec_image_file').onchange = e => handleImageUpload(e.target, '#sec_image_url
 $('#item_image_file').onchange = e => handleImageUpload(e.target, '#item_image_url', '#item_image_preview', 'items');
 
 $('#btnSaveSection').onclick = async () => {
+  // 타이포그래피는 기존 extra와 머지 (다른 키를 보존)
+  const baseExtra = (editingSection && editingSection.extra) ? { ...editingSection.extra } : {};
+  const tFont  = $('#sec_title_font').value;
+  const tScale = $('#sec_title_scale').value;
+  const bFont  = $('#sec_body_font').value;
+  const bScale = $('#sec_body_scale').value;
+  if (tFont)  baseExtra.title_font = tFont;   else delete baseExtra.title_font;
+  if (tScale) baseExtra.title_scale = Number(tScale); else delete baseExtra.title_scale;
+  if (bFont)  baseExtra.body_font = bFont;    else delete baseExtra.body_font;
+  if (bScale) baseExtra.body_scale = Number(bScale);  else delete baseExtra.body_scale;
   const payload = {
     slug: ($('#sec_slug').value || '').trim() || 'section-'+Date.now(),
     type: $('#sec_type').value,
@@ -857,6 +930,7 @@ $('#btnSaveSection').onclick = async () => {
     link_label: $('#sec_link_label').value || null,
     link_url: $('#sec_link_url').value || null,
     is_visible: $('#sec_is_visible').value === 'true',
+    extra: baseExtra,
   };
   let res;
   if (editingSection) {

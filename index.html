@@ -129,9 +129,9 @@
     border-bottom:1px solid var(--line);
   }
   .hero-title {
-    font-family: var(--display);
+    font-family: var(--title-font, var(--display));
     font-weight: 900;
-    font-size: clamp(60px, 12vw, 200px);
+    font-size: calc(clamp(60px, 12vw, 200px) * var(--title-scale, 1));
     line-height: .88;
     letter-spacing: -.02em;
     margin:0;
@@ -144,8 +144,8 @@
     color: var(--accent);
   }
   .hero-sub {
-    font-family: var(--serif);
-    font-size: clamp(15px, 1.3vw, 19px);
+    font-family: var(--body-font, var(--serif));
+    font-size: calc(clamp(15px, 1.3vw, 19px) * var(--body-scale, 1));
     line-height: 1.7;
     max-width: 420px;
     margin: 0 0 18px;
@@ -241,8 +241,8 @@
     color: var(--muted);
   }
   .block-title {
-    font-family: var(--display); font-weight: 900;
-    font-size: clamp(36px, 6vw, 84px);
+    font-family: var(--title-font, var(--display)); font-weight: 900;
+    font-size: calc(clamp(36px, 6vw, 84px) * var(--title-scale, 1));
     letter-spacing:-.01em;
     margin:0; text-transform: uppercase;
   }
@@ -253,8 +253,8 @@
 
   /* 텍스트 블록 */
   .text-body {
-    font-family: var(--serif);
-    font-size: clamp(17px, 1.6vw, 24px);
+    font-family: var(--body-font, var(--serif));
+    font-size: calc(clamp(17px, 1.6vw, 24px) * var(--body-scale, 1));
     line-height: 1.8;
     max-width: 780px;
     margin: 0 auto;
@@ -268,11 +268,13 @@
   }
   .image-text img { aspect-ratio: 4/5; object-fit:cover; width:100%; background:#eee; }
   .image-text .text h3 {
-    font-family: var(--display); font-size: clamp(28px,3vw,44px);
+    font-family: var(--title-font, var(--display));
+    font-size: calc(clamp(28px,3vw,44px) * var(--title-scale, 1));
     margin:0 0 16px; font-weight:900; letter-spacing:-.01em;
   }
   .image-text .text p {
-    font-family: var(--serif); line-height:1.8; font-size:16px;
+    font-family: var(--body-font, var(--serif)); line-height:1.8;
+    font-size: calc(16px * var(--body-scale, 1));
     color:#222;
   }
 
@@ -318,7 +320,7 @@
     border-bottom:1px solid var(--line);
   }
   .cta .block-title { color:#fff; border:0; }
-  .cta-text { font-family: var(--serif); font-size: clamp(18px,2vw,24px); max-width:620px; margin: 0 auto 34px; line-height:1.7; opacity:.85; }
+  .cta-text { font-family: var(--body-font, var(--serif)); font-size: calc(clamp(18px,2vw,24px) * var(--body-scale, 1)); max-width:620px; margin: 0 auto 34px; line-height:1.7; opacity:.85; }
   .btn-bold {
     display:inline-block; padding: 18px 44px;
     border: 1.5px solid #fff;
@@ -928,8 +930,49 @@
     });
   }
 
+  function buildTypoStyle(extra) {
+    const ex = extra || {};
+    const parts = [];
+    if (ex.title_font && ['display','serif','sans'].includes(ex.title_font)) parts.push(`--title-font:var(--${ex.title_font})`);
+    if (ex.title_scale && Number(ex.title_scale) > 0) parts.push(`--title-scale:${Number(ex.title_scale)}`);
+    if (ex.body_font && ['display','serif','sans'].includes(ex.body_font)) parts.push(`--body-font:var(--${ex.body_font})`);
+    if (ex.body_scale && Number(ex.body_scale) > 0) parts.push(`--body-scale:${Number(ex.body_scale)}`);
+    return parts.join(';');
+  }
+
+  const TYPO_FONTS = [
+    { value: '',        label: '기본 (테마)' },
+    { value: 'display', label: '디스플레이 (Archivo · 영문 굵은)' },
+    { value: 'serif',   label: '세리프 (Noto Serif KR)' },
+    { value: 'sans',    label: '산세리프 (Noto Sans KR)' },
+  ];
+  const TYPO_SCALES = [
+    { value: '',     label: '기본 (100%)' },
+    { value: '0.75', label: '작게 (75%)' },
+    { value: '0.9',  label: '약간 작게 (90%)' },
+    { value: '1',    label: '보통 (100%)' },
+    { value: '1.15', label: '약간 크게 (115%)' },
+    { value: '1.3',  label: '크게 (130%)' },
+    { value: '1.5',  label: '더 크게 (150%)' },
+    { value: '1.75', label: '강조 (175%)' },
+    { value: '2',    label: '최대 (200%)' },
+  ];
+  function renderFontSelect(id, current) {
+    const cur = current || '';
+    return `<select id="${id}" style="width:100%; padding:10px 12px; background:#f7f8fb; border:1px solid #dfe2e9; border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg); box-sizing:border-box;">
+      ${TYPO_FONTS.map(o => `<option value="${o.value}"${String(cur)===o.value ? ' selected':''}>${o.label}</option>`).join('')}
+    </select>`;
+  }
+  function renderScaleSelect(id, current) {
+    const cur = current == null ? '' : String(current);
+    return `<select id="${id}" style="width:100%; padding:10px 12px; background:#f7f8fb; border:1px solid #dfe2e9; border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg); box-sizing:border-box;">
+      ${TYPO_SCALES.map(o => `<option value="${o.value}"${cur===o.value ? ' selected':''}>${o.label}</option>`).join('')}
+    </select>`;
+  }
+
   function renderSection(s, idx, isSample) {
     const anchor = `id="${s.slug}"`;
+    const typoStyle = buildTypoStyle(s.extra);
     const typeLabel = {
       hero:'대문',
       text:'본문',
@@ -980,8 +1023,10 @@
         } else if (s.image_url) {
           visual = `<div class="hero-visual reveal" style="background-image:url('${s.image_url}');"></div>`;
         }
+        const heroBg = (s.image_url || heroSlides.length) ? '' : 'background:linear-gradient(180deg,var(--bg),var(--bg-soft));';
+        const heroStyle = [typoStyle, heroBg].filter(Boolean).join(';');
         return `
-        <section ${anchor} class="hero" style="${(s.image_url || heroSlides.length) ? '': 'background:linear-gradient(180deg,var(--bg),var(--bg-soft));'}">
+        <section ${anchor} class="hero"${heroStyle ? ` style="${heroStyle}"` : ''}>
           ${editHint}
           <div>
             <h1 class="hero-title reveal">${escape(s.title||'')}${s.subtitle ? `<br><em>${escape(s.subtitle)}</em>` : ''}</h1>
@@ -995,7 +1040,7 @@
 
       case 'text':
         return `
-        <section ${anchor} class="block">
+        <section ${anchor} class="block"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           ${header}
           <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
@@ -1003,7 +1048,7 @@
 
       case 'image_text':
         return `
-        <section ${anchor} class="block">
+        <section ${anchor} class="block"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           ${header}
           <div class="image-text reveal">
@@ -1027,10 +1072,10 @@
             ${i.price ? `<div class="price">${escape(i.price)}</div>`:''}
           </a>`).join('');
         return `
-        <section ${anchor} class="block">
+        <section ${anchor} class="block"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           ${header}
-          ${s.body ? `<p class="reveal" style="font-family:var(--serif); max-width:620px; margin:-24px 0 40px; color:#333;">${escape(s.body)}</p>`: ''}
+          ${s.body ? `<p class="reveal" style="font-family:var(--body-font, var(--serif)); font-size:calc(16px * var(--body-scale, 1)); max-width:620px; margin:-24px 0 40px; color:#333;">${escape(s.body)}</p>`: ''}
           <div class="gallery-grid">${cards || `<div class="empty-note" style="grid-column:1/-1;">항목이 없습니다.</div>`}</div>
         </section>`;
 
@@ -1040,7 +1085,7 @@
           ? `<button class="btn-bold reveal" type="button" data-open-inquiry="1">${escape(s.link_label||'문의 남기기')}</button>`
           : (s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(s.link_label||'GET IN TOUCH')}</a>` : '');
         return `
-        <section ${anchor} class="cta">
+        <section ${anchor} class="cta"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           <div class="block-header reveal" style="justify-content:center; border-color:rgba(255,255,255,.2);">
             <span class="block-index" style="color:rgba(255,255,255,.6);">№ ${String(idx+1).padStart(2,'0')}</span>
@@ -1053,7 +1098,7 @@
 
       default:
         return `
-        <section ${anchor} class="block">
+        <section ${anchor} class="block"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           ${header}
           <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
@@ -1267,6 +1312,29 @@
           <input type="text" id="iem_link_url" value="${escapeAttr(s.link_url||'')}" placeholder="#anchor 또는 https://...">
         </div>
       </div>` : ''}
+      <div style="border-top:1px dashed #dfe2e9; padding-top:14px; margin-top:4px;">
+        <div style="font-family:var(--display); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:10px;">타이포그래피 (이 섹션만 적용)</div>
+        <div class="iem-grid-2">
+          <div class="iem-field">
+            <label>제목 폰트</label>
+            ${renderFontSelect('iem_title_font', s.extra?.title_font)}
+          </div>
+          <div class="iem-field">
+            <label>제목 크기</label>
+            ${renderScaleSelect('iem_title_scale', s.extra?.title_scale)}
+          </div>
+        </div>
+        <div class="iem-grid-2">
+          <div class="iem-field">
+            <label>본문 폰트</label>
+            ${renderFontSelect('iem_body_font', s.extra?.body_font)}
+          </div>
+          <div class="iem-field">
+            <label>본문 크기</label>
+            ${renderScaleSelect('iem_body_scale', s.extra?.body_scale)}
+          </div>
+        </div>
+      </div>
     `;
 
     if (showImage) {
@@ -1328,6 +1396,17 @@
       payload.link_label = $('#iem_link_label').value || null;
       payload.link_url = $('#iem_link_url').value || null;
     }
+    // 타이포그래피 (extra jsonb 머지)
+    const titleFont  = $('#iem_title_font')?.value || '';
+    const titleScale = $('#iem_title_scale')?.value || '';
+    const bodyFont   = $('#iem_body_font')?.value || '';
+    const bodyScale  = $('#iem_body_scale')?.value || '';
+    const nextExtra = { ...(s.extra || {}) };
+    if (titleFont)  nextExtra.title_font = titleFont;  else delete nextExtra.title_font;
+    if (titleScale) nextExtra.title_scale = Number(titleScale); else delete nextExtra.title_scale;
+    if (bodyFont)   nextExtra.body_font = bodyFont;   else delete nextExtra.body_font;
+    if (bodyScale)  nextExtra.body_scale = Number(bodyScale);  else delete nextExtra.body_scale;
+    payload.extra = nextExtra;
     try {
       const { error } = await supabase.from('sections').update(payload).eq('id', s.id);
       if (error) throw error;
