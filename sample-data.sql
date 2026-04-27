@@ -97,7 +97,7 @@ values (
   'contact', 'cta',
   'CONTACT', '함께 만들어요',
   '새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
-  '이메일 보내기', 'mailto:hello@bold.kr',
+  '문의하기', '#inquiry',
   5
 );
 

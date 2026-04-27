@@ -908,7 +908,7 @@
       { id:'s5', slug:'contact', type:'cta', sort_order:5,
         title:'CONTACT', subtitle:'함께 만들어요',
         body:'새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
-        link_label:'문의 남기기', link_url:'#inquiry',
+        link_label:'문의하기', link_url:'#inquiry',
         items:[] },
     ];
   }
@@ -1206,9 +1206,13 @@
 
       case 'cta': {
         const isContact = (s.slug || '').toLowerCase() === 'contact';
+        // 레거시 라벨('이메일 보내기' / 'mailto:...') 자동 정규화 → '문의하기'
+        const rawLabel = (s.link_label || '').trim();
+        const isLegacyMailLabel = !rawLabel || rawLabel === '이메일 보내기' || rawLabel === '문의 남기기' || /^mailto:/i.test(rawLabel);
+        const contactLabel = isLegacyMailLabel ? '문의하기' : rawLabel;
         const ctaButton = isContact
-          ? `<button class="btn-bold reveal" type="button" data-open-inquiry="1">${escape(s.link_label||'문의 남기기')}</button>`
-          : (s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(s.link_label||'GET IN TOUCH')}</a>` : '');
+          ? `<button class="btn-bold reveal" type="button" data-open-inquiry="1">${escape(contactLabel)}</button>`
+          : (s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(rawLabel || 'GET IN TOUCH')}</a>` : '');
         return `
         <section ${anchor} class="cta"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
@@ -1610,7 +1614,7 @@
       await supabase.from('sections').insert({
         slug:'contact', type:'cta', title:'CONTACT', subtitle:'함께 만들어요',
         body:'새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
-        link_label:'문의 남기기', link_url:'#inquiry',
+        link_label:'문의하기', link_url:'#inquiry',
         sort_order:5
       });
       iemToast('설치 완료 · 관리자 모드로 전환됩니다');
