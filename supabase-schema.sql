@@ -21,6 +21,12 @@ create table if not exists public.site_settings (
   seo_description text,
   theme_primary_color text default '#0a0a0a',
   theme_accent_color text default '#ff3b30',
+  -- i18n: 영문 버전 (비어있으면 사이트가 한글로 폴백)
+  site_name_en text,
+  site_tagline_en text,
+  footer_text_en text,
+  seo_description_en text,
+  contact_address_en text,
   updated_at timestamptz default now(),
   constraint single_row check (id = 1)
 );
@@ -41,6 +47,11 @@ create table if not exists public.sections (
   link_label text,
   link_url text,
   extra jsonb default '{}'::jsonb,            -- 타입별 확장 필드
+  -- i18n: 영문 버전 (비어있으면 한글로 폴백)
+  title_en text,
+  subtitle_en text,
+  body_en text,
+  link_label_en text,
   sort_order int default 0,
   is_visible boolean default true,
   created_at timestamptz default now(),
@@ -62,6 +73,11 @@ create table if not exists public.items (
   tag text,
   price text,                                 -- 쇼핑몰성 확장 대비
   extra jsonb default '{}'::jsonb,
+  -- i18n: 영문 버전 (비어있으면 한글로 폴백)
+  title_en text,
+  subtitle_en text,
+  description_en text,
+  tag_en text,
   sort_order int default 0,
   is_visible boolean default true,
   created_at timestamptz default now(),

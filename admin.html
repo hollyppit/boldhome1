@@ -284,6 +284,23 @@
         </div>
       </div>
 
+      <div class="card" style="border-color:#3a3340;">
+        <h3>🇬🇧 English version (영문 버전)</h3>
+        <p style="font-size:12px; color:var(--muted); margin:0 0 14px; line-height:1.6;">
+          공개 사이트 우측 상단의 🌐 토글로 전환됩니다. <b style="color:var(--fg);">비워두면 한글 값으로 자동 폴백</b>되니, 영어로 바꾸고 싶은 항목만 채우세요.
+        </p>
+        <div class="grid-2">
+          <div><label>Site name (영문)</label><input id="f_site_name_en" placeholder="BOLD" /></div>
+          <div><label>Tagline / 헤더 로고 (영문)</label><input id="f_site_tagline_en" placeholder="BOLD" /></div>
+        </div>
+        <label>SEO description (영문)</label>
+        <textarea id="f_seo_description_en" placeholder="BOLD — A bold brand, a new sensibility."></textarea>
+        <div class="grid-2" style="margin-top:6px;">
+          <div><label>주소 (영문)</label><input id="f_contact_address_en" placeholder="Deokjin-gu, Jeonju, South Korea" /></div>
+          <div><label>푸터 카피라이트 (영문)</label><input id="f_footer_text_en" placeholder="COPYRIGHT (c) BOLD ALL RIGHTS RESERVED." /></div>
+        </div>
+      </div>
+
       <div style="display:flex; gap:8px; justify-content:flex-end;">
         <button class="btn" id="btnReloadSettings">다시 불러오기</button>
         <button class="btn btn-primary" id="btnSaveSettings">저장</button>
@@ -413,6 +430,24 @@
     <input id="sec_video_url" placeholder="https://youtu.be/... 또는 https://www.youtube.com/watch?v=..." />
     <div style="font-size:11px; color:var(--muted); margin-top:4px;">입력 시 해당 섹션에 16:9 임베드 플레이어가 표시됩니다. (hero / image_text 타입은 이미지 자리에, 그 외에는 본문 아래에)</div>
 
+    <!-- 영문 버전 (i18n) -->
+    <div style="border:1px dashed var(--line); border-radius:8px; padding:14px 16px; margin-top:18px;">
+      <h3 style="margin:0 0 8px; font-family:var(--mono); font-weight:700; letter-spacing:.08em; font-size:13px; text-transform:uppercase; color:var(--muted);">
+        🇬🇧 English version <small style="color:#666; font-weight:400; letter-spacing:0; text-transform:none;">— 사이트 영어 모드(🌐 ENGLISH) 전환 시 사용</small>
+      </h3>
+      <p style="font-size:11px; color:var(--muted); margin:0 0 12px; line-height:1.7;">
+        비워두면 영어 모드에서 한글 값으로 자동 폴백됩니다. 이미지·비디오·링크 URL은 한·영 공용입니다.
+      </p>
+      <div class="grid-2">
+        <div><label>Title (English)</label><input id="sec_title_en" /></div>
+        <div><label>Subtitle (English)</label><input id="sec_subtitle_en" /></div>
+      </div>
+      <label>Body (English)</label>
+      <textarea id="sec_body_en"></textarea>
+      <label>Button label (English)</label>
+      <input id="sec_link_label_en" />
+    </div>
+
     <!-- 타이포그래피 (이 섹션만 적용) -->
     <div style="border-top:1px dashed var(--line); padding-top:14px; margin-top:18px;">
       <h3 style="margin:0 0 12px; font-family:var(--mono); font-weight:700; letter-spacing:.08em; font-size:13px; text-transform:uppercase; color:var(--muted);">
@@ -505,6 +540,25 @@
         <select id="item_is_visible"><option value="true">노출</option><option value="false">숨김</option></select>
       </div>
     </div>
+
+    <!-- 영문 버전 (i18n) -->
+    <div style="border:1px dashed var(--line); border-radius:8px; padding:14px 16px; margin-top:18px;">
+      <h3 style="margin:0 0 8px; font-family:var(--mono); font-weight:700; letter-spacing:.08em; font-size:13px; text-transform:uppercase; color:var(--muted);">
+        🇬🇧 English version <small style="color:#666; font-weight:400; letter-spacing:0; text-transform:none;">— 영어 모드일 때 사용</small>
+      </h3>
+      <p style="font-size:11px; color:var(--muted); margin:0 0 12px; line-height:1.7;">
+        비워두면 영어 모드에서 한글 값으로 자동 폴백됩니다. 가격·이미지·링크는 한·영 공용입니다.
+      </p>
+      <div class="grid-2">
+        <div><label>Title (English)</label><input id="item_title_en" /></div>
+        <div><label>Subtitle (English)</label><input id="item_subtitle_en" /></div>
+      </div>
+      <label>Description (English)</label>
+      <textarea id="item_description_en"></textarea>
+      <label>Tag (English)</label>
+      <input id="item_tag_en" placeholder="NEW, HOT, ..." />
+    </div>
+
     <div class="modal-actions">
       <button class="btn btn-danger" id="btnDeleteItem">삭제</button>
       <div style="flex:1"></div>
@@ -677,7 +731,10 @@ const SETTING_FIELDS = [
   'site_name','site_tagline','logo_url','seo_description',
   'contact_email','contact_phone','contact_address',
   'social_instagram','social_youtube','social_facebook',
-  'footer_text','theme_primary_color','theme_accent_color'
+  'footer_text','theme_primary_color','theme_accent_color',
+  // i18n: 영문 버전
+  'site_name_en','site_tagline_en','seo_description_en',
+  'contact_address_en','footer_text_en'
 ];
 async function loadSettings() {
   const { data, error } = await supabase.from('site_settings').select('*').eq('id',1).single();
@@ -902,6 +959,11 @@ async function openSectionModal(id) {
     $('#sec_link_label').value = s.link_label || '';
     $('#sec_link_url').value = s.link_url || '';
     $('#sec_is_visible').value = s.is_visible === false ? 'false' : 'true';
+    // i18n 영문
+    $('#sec_title_en').value      = s.title_en      || '';
+    $('#sec_subtitle_en').value   = s.subtitle_en   || '';
+    $('#sec_body_en').value       = s.body_en       || '';
+    $('#sec_link_label_en').value = s.link_label_en || '';
     const ex = s.extra || {};
     $('#sec_title_font').value  = ex.title_font  || '';
     $('#sec_title_scale').value = ex.title_scale != null ? String(ex.title_scale) : '';
@@ -914,7 +976,8 @@ async function openSectionModal(id) {
   } else {
     editingSection = null;
     $('#sectionModalTitle').textContent = '새 섹션';
-    ['slug','title','subtitle','body','image_url','link_label','link_url','video_url'].forEach(k => $(`#sec_${k}`).value = '');
+    ['slug','title','subtitle','body','image_url','link_label','link_url','video_url',
+     'title_en','subtitle_en','body_en','link_label_en'].forEach(k => $(`#sec_${k}`).value = '');
     $('#sec_type').value = 'text';
     $('#sec_is_visible').value = 'true';
     ['title_font','title_scale','body_font','body_scale'].forEach(k => $(`#sec_${k}`).value = '');
@@ -1008,6 +1071,11 @@ $('#btnSaveSection').onclick = async () => {
     link_label: $('#sec_link_label').value || null,
     link_url: $('#sec_link_url').value || null,
     is_visible: $('#sec_is_visible').value === 'true',
+    // i18n 영문
+    title_en:      $('#sec_title_en').value      || null,
+    subtitle_en:   $('#sec_subtitle_en').value   || null,
+    body_en:       $('#sec_body_en').value       || null,
+    link_label_en: $('#sec_link_label_en').value || null,
     extra: baseExtra,
   };
   let res;
@@ -1104,11 +1172,17 @@ function openItemModal(id) {
     $('#item_tag').value = editingItem.tag||'';
     $('#item_price').value = editingItem.price||'';
     $('#item_is_visible').value = editingItem.is_visible===false?'false':'true';
+    // i18n 영문
+    $('#item_title_en').value       = editingItem.title_en       || '';
+    $('#item_subtitle_en').value    = editingItem.subtitle_en    || '';
+    $('#item_description_en').value = editingItem.description_en || '';
+    $('#item_tag_en').value         = editingItem.tag_en         || '';
     $('#btnDeleteItem').classList.remove('hidden');
   } else {
     editingItem = null;
     $('#itemModalTitle').textContent = '새 아이템';
-    ['title','subtitle','description','image_url','link_url','tag','price'].forEach(k=>$(`#item_${k}`).value='');
+    ['title','subtitle','description','image_url','link_url','tag','price',
+     'title_en','subtitle_en','description_en','tag_en'].forEach(k=>$(`#item_${k}`).value='');
     $('#item_is_visible').value='true';
     $('#btnDeleteItem').classList.add('hidden');
   }
@@ -1129,6 +1203,11 @@ $('#btnSaveItem').onclick = async () => {
     tag: $('#item_tag').value || null,
     price: $('#item_price').value || null,
     is_visible: $('#item_is_visible').value === 'true',
+    // i18n 영문
+    title_en:       $('#item_title_en').value       || null,
+    subtitle_en:    $('#item_subtitle_en').value    || null,
+    description_en: $('#item_description_en').value || null,
+    tag_en:         $('#item_tag_en').value         || null,
   };
   let res;
   if (editingItem) res = await supabase.from('items').update(payload).eq('id', editingItem.id).select().single();

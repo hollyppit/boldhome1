@@ -628,24 +628,25 @@
 
 <!-- 샘플 모드 배너 (DB 비었을 때만 on 클래스 추가됨) -->
 <div class="sample-banner" id="sampleBanner">
-  <span>📦 <b>샘플 콘텐츠</b>가 표시되고 있습니다 — Supabase에 실제 섹션이 없어요.</span>
-  <a href="admin.html" class="sample-cta">관리자 페이지에서 편집 →</a>
-  <span class="sample-or">또는</span>
-  <a href="https://github.com/hollyppit/boldhome1/blob/main/sample-data.sql" target="_blank" class="sample-cta sample-cta-ghost">sample-data.sql을 Supabase SQL Editor에서 1회 실행</a>
+  <span data-i18n-html="sample_banner">📦 <b>샘플 콘텐츠</b>가 표시되고 있습니다 — Supabase에 실제 섹션이 없어요.</span>
+  <a href="admin.html" class="sample-cta" data-i18n="sample_cta">관리자 페이지에서 편집 →</a>
+  <span class="sample-or" data-i18n="sample_or">또는</span>
+  <a href="https://github.com/hollyppit/boldhome1/blob/main/sample-data.sql" target="_blank" class="sample-cta sample-cta-ghost" data-i18n="sample_alt">sample-data.sql을 Supabase SQL Editor에서 1회 실행</a>
 </div>
 
 <!-- 관리자 모드 상단 바 (body.admin-mode일 때만 표시) -->
 <div class="admin-bar" id="adminBar">
-  <span>🔧 <b>관리자 모드</b> · 섹션 우측 상단 ✎ 버튼으로 편집하세요</span>
-  <a href="admin.html" target="_blank">고급 편집(슬라이드·아이템·설정)</a>
-  <button id="btnExitAdmin" class="admin-exit">종료</button>
+  <span data-i18n-html="admin_bar">🔧 <b>관리자 모드</b> · 섹션 우측 상단 ✎ 버튼으로 편집하세요</span>
+  <a href="admin.html" target="_blank" data-i18n="admin_advanced">고급 편집(슬라이드·아이템·설정)</a>
+  <button id="btnExitAdmin" class="admin-exit" data-i18n="admin_exit_btn">종료</button>
 </div>
 
 <!-- 상단 유틸 -->
 <div class="top-util">
-  <a href="#" id="btnAdminToggle">관리자</a>
-  <a href="#" data-open-inquiry="lookup">내 문의 확인</a>
-  <a href="#contact">CONTACT</a>
+  <a href="#" id="btnLangToggle" data-i18n="lang_toggle" title="Switch language">🌐 ENGLISH</a>
+  <a href="#" id="btnAdminToggle" data-i18n="admin">관리자</a>
+  <a href="#" data-open-inquiry="lookup" data-i18n="my_inquiry">내 문의 확인</a>
+  <a href="#contact" data-i18n="contact">CONTACT</a>
 </div>
 
 <!-- 헤더 -->
@@ -687,7 +688,7 @@
 
 <!-- 메인: Supabase에서 섹션을 읽어와 동적으로 렌더 -->
 <main id="main">
-  <div class="empty-note" id="loadingNote">불러오는 중…</div>
+  <div class="empty-note" id="loadingNote" data-i18n="loading">불러오는 중…</div>
 </main>
 
 <!-- 푸터 -->
@@ -710,14 +711,14 @@
     <div>
       <h5>LINK</h5>
       <ul>
-        <li><a href="#top">TOP</a></li>
-        <li><a href="admin.html">ADMIN</a></li>
+        <li><a href="#top" data-i18n="footer_top">TOP</a></li>
+        <li><a href="admin.html" data-i18n="footer_admin">ADMIN</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <span id="footerCopyright">COPYRIGHT (c) BOLD ALL RIGHTS RESERVED.</span>
-    <span>DESIGNED WITH CARE</span>
+    <span data-i18n="footer_designed">DESIGNED WITH CARE</span>
   </div>
 </footer>
 
@@ -731,10 +732,10 @@
     </div>
     <div class="iem-body" id="iemBody"></div>
     <div class="iem-footer">
-      <a href="admin.html" target="_blank" class="iem-advanced">고급 편집 ↗</a>
+      <a href="admin.html" target="_blank" class="iem-advanced" data-i18n="iem_advanced">고급 편집 ↗</a>
       <div style="flex:1"></div>
-      <button class="iem-btn" id="iemCancel">취소</button>
-      <button class="iem-btn iem-btn-primary" id="iemSave">저장</button>
+      <button class="iem-btn" id="iemCancel" data-i18n="iem_cancel">취소</button>
+      <button class="iem-btn iem-btn-primary" id="iemSave" data-i18n="iem_save">저장</button>
     </div>
   </div>
 </div>
@@ -744,25 +745,25 @@
 <div class="iq-backdrop" id="iqBackdrop" role="dialog" aria-modal="true" aria-label="문의 남기기">
   <div class="iq-panel">
     <div class="iq-tabs">
-      <button class="iq-tab active" type="button" data-iq-tab="write">새 문의 작성</button>
-      <button class="iq-tab" type="button" data-iq-tab="lookup">내 문의 확인 / 수정</button>
-      <button class="iq-close" type="button" id="iqClose" aria-label="닫기">✕</button>
+      <button class="iq-tab active" type="button" data-iq-tab="write" data-i18n="iq_title_write">새 문의 작성</button>
+      <button class="iq-tab" type="button" data-iq-tab="lookup" data-i18n="iq_title_lookup">내 문의 확인 / 수정</button>
+      <button class="iq-close" type="button" id="iqClose" aria-label="close">✕</button>
     </div>
 
     <!-- 작성 -->
     <div class="iq-pane" data-iq-pane="write">
-      <p class="iq-help">
+      <p class="iq-help" data-i18n-html="iq_help_write">
         보내신 문의는 <b>비밀글</b>로 등록되어 관리자만 확인합니다.
         등록 후 발급되는 <b>문의 번호</b>와 직접 설정하신 <b>비밀번호</b>로 본인 글을 다시 조회·수정·삭제하실 수 있습니다.
       </p>
-      <div class="iq-field"><label>제목</label><input id="iqTitle" maxlength="120" placeholder="문의 제목" /></div>
-      <div class="iq-field"><label>내용</label><textarea id="iqBody" placeholder="문의 내용을 자유롭게 적어주세요."></textarea></div>
-      <div class="iq-field"><label>연락처 (이메일·전화 등, 선택)</label><input id="iqContact" maxlength="120" placeholder="회신 받으실 이메일 또는 전화" /></div>
-      <div class="iq-field"><label>수정용 비밀번호 (4자 이상)</label><input id="iqPw" type="password" minlength="4" placeholder="본인 글 확인·수정에 사용됩니다" /></div>
+      <div class="iq-field"><label data-i18n="iq_label_title">제목</label><input id="iqTitle" maxlength="120" data-i18n-ph="iq_ph_title" placeholder="문의 제목" /></div>
+      <div class="iq-field"><label data-i18n="iq_label_body">내용</label><textarea id="iqBody" data-i18n-ph="iq_ph_body" placeholder="문의 내용을 자유롭게 적어주세요."></textarea></div>
+      <div class="iq-field"><label data-i18n="iq_label_contact">연락처 (이메일·전화 등, 선택)</label><input id="iqContact" maxlength="120" data-i18n-ph="iq_ph_contact" placeholder="회신 받으실 이메일 또는 전화" /></div>
+      <div class="iq-field"><label data-i18n="iq_label_pw">수정용 비밀번호 (4자 이상)</label><input id="iqPw" type="password" minlength="4" data-i18n-ph="iq_ph_pw" placeholder="본인 글 확인·수정에 사용됩니다" /></div>
       <div class="iq-actions">
-        <button class="iq-btn" type="button" id="iqCancelWrite">닫기</button>
+        <button class="iq-btn" type="button" id="iqCancelWrite" data-i18n="iq_close">닫기</button>
         <div style="flex:1"></div>
-        <button class="iq-btn iq-btn-primary" type="button" id="iqSubmit">등록</button>
+        <button class="iq-btn iq-btn-primary" type="button" id="iqSubmit" data-i18n="iq_submit">등록</button>
       </div>
       <div class="iq-success hidden" id="iqSuccess"></div>
     </div>
@@ -770,26 +771,26 @@
     <!-- 조회/수정 -->
     <div class="iq-pane hidden" data-iq-pane="lookup">
       <div id="iqLookupForm">
-        <p class="iq-help">문의 번호와 본인이 설정한 비밀번호를 입력하세요.</p>
-        <div class="iq-field"><label>문의 번호</label><input id="iqLkId" type="number" min="1" placeholder="등록 시 발급받은 번호" /></div>
-        <div class="iq-field"><label>비밀번호</label><input id="iqLkPw" type="password" /></div>
+        <p class="iq-help" data-i18n="iq_lookup_help">문의 번호와 본인이 설정한 비밀번호를 입력하세요.</p>
+        <div class="iq-field"><label data-i18n="iq_lookup_id">문의 번호</label><input id="iqLkId" type="number" min="1" data-i18n-ph="iq_lookup_id_ph" placeholder="등록 시 발급받은 번호" /></div>
+        <div class="iq-field"><label data-i18n="iq_lookup_pw">비밀번호</label><input id="iqLkPw" type="password" /></div>
         <div class="iq-actions">
-          <button class="iq-btn" type="button" id="iqCancelLookup">닫기</button>
+          <button class="iq-btn" type="button" id="iqCancelLookup" data-i18n="iq_close">닫기</button>
           <div style="flex:1"></div>
-          <button class="iq-btn iq-btn-primary" type="button" id="iqLookupBtn">조회</button>
+          <button class="iq-btn iq-btn-primary" type="button" id="iqLookupBtn" data-i18n="iq_lookup">조회</button>
         </div>
       </div>
 
       <div id="iqEditForm" class="hidden">
-        <div class="iq-field"><label>제목</label><input id="iqEdTitle" /></div>
-        <div class="iq-field"><label>내용</label><textarea id="iqEdBody"></textarea></div>
-        <div class="iq-field"><label>연락처</label><input id="iqEdContact" /></div>
+        <div class="iq-field"><label data-i18n="iq_label_title">제목</label><input id="iqEdTitle" /></div>
+        <div class="iq-field"><label data-i18n="iq_label_body">내용</label><textarea id="iqEdBody"></textarea></div>
+        <div class="iq-field"><label data-i18n="iq_label_contact">연락처</label><input id="iqEdContact" /></div>
         <div class="iq-meta" id="iqEdMeta"></div>
         <div class="iq-actions">
-          <button class="iq-btn iq-btn-danger" type="button" id="iqEdDelete">삭제</button>
+          <button class="iq-btn iq-btn-danger" type="button" id="iqEdDelete" data-i18n="iq_delete">삭제</button>
           <div style="flex:1"></div>
-          <button class="iq-btn" type="button" id="iqEdBack">뒤로</button>
-          <button class="iq-btn iq-btn-primary" type="button" id="iqEdSave">저장</button>
+          <button class="iq-btn" type="button" id="iqEdBack" data-i18n="iq_back">뒤로</button>
+          <button class="iq-btn iq-btn-primary" type="button" id="iqEdSave" data-i18n="iq_save">저장</button>
         </div>
       </div>
     </div>
@@ -797,6 +798,159 @@
 </div>
 
 <script type="module">
+  // ================== 다국어(i18n) ==================
+  const LANG_KEY = 'bold_lang';
+  let CURRENT_LANG = (localStorage.getItem(LANG_KEY) === 'en') ? 'en' : 'ko';
+
+  const I18N = {
+    ko: {
+      lang_toggle: '🌐 ENGLISH',
+      admin: '관리자',
+      admin_exit: '관리자 종료',
+      my_inquiry: '내 문의 확인',
+      contact: 'CONTACT',
+      intro: 'INTRO',
+      learn_more: '자세히 보기',
+      view_more: '더 보기',
+      get_in_touch: '문의하기',
+      inquiry_btn: '문의하기',
+      sample_banner: '<b>샘플 콘텐츠</b>가 표시되고 있습니다 — Supabase에 실제 섹션이 없어요.',
+      sample_cta: '관리자 페이지에서 편집 →',
+      sample_or: '또는',
+      sample_alt: 'sample-data.sql을 Supabase SQL Editor에서 1회 실행',
+      admin_bar: '🔧 <b>관리자 모드</b> · 섹션 우측 상단 ✎ 버튼으로 편집하세요',
+      admin_advanced: '고급 편집(슬라이드·아이템·설정)',
+      admin_exit_btn: '종료',
+      loading: '불러오는 중…',
+      empty_sections: '섹션이 비어있습니다. 관리자 페이지에서 추가해 주세요.',
+      load_failed: '데이터 로딩 실패. Supabase 설정을 확인해 주세요.',
+      empty_items: '항목이 없습니다.',
+      footer_top: 'TOP',
+      footer_admin: 'ADMIN',
+      footer_designed: 'DESIGNED WITH CARE',
+      iem_title_suffix: ' 편집',
+      iem_advanced: '고급 편집 ↗',
+      iem_cancel: '취소',
+      iem_save: '저장',
+      iem_label_title: '제목 (Title)',
+      iem_label_subtitle: '부제 (Subtitle)',
+      iem_label_body: '본문 (Body) · 줄바꿈 그대로 적용',
+      iem_label_image: '이미지',
+      iem_label_video: '비디오 URL (YouTube · 선택)',
+      iem_label_link_label: '버튼 라벨',
+      iem_label_link_url: '버튼 링크 URL',
+      iem_typo_section: '타이포그래피 (이 섹션만 적용)',
+      iem_label_title_font: '제목 폰트',
+      iem_label_title_scale: '제목 크기',
+      iem_label_body_font: '본문 폰트',
+      iem_label_body_scale: '본문 크기',
+      iem_save_done: '저장 완료 · 새로고침합니다',
+      iem_save_fail: '저장 실패: ',
+      iem_section_ko: '🇰🇷 한국어',
+      iem_section_en: '🇬🇧 English',
+      iem_en_hint: '비워두면 영어 모드에서 한글 값으로 자동 폴백됩니다',
+      iq_title_write: '새 문의 작성',
+      iq_title_lookup: '내 문의 확인 / 수정',
+      iq_help_write: '보내신 문의는 <b>비밀글</b>로 등록되어 관리자만 확인합니다. 등록 후 발급되는 <b>문의 번호</b>와 직접 설정하신 <b>비밀번호</b>로 본인 글을 다시 조회·수정·삭제하실 수 있습니다.',
+      iq_label_title: '제목',
+      iq_label_body: '내용',
+      iq_label_contact: '연락처 (이메일·전화 등, 선택)',
+      iq_label_pw: '수정용 비밀번호 (4자 이상)',
+      iq_ph_title: '문의 제목',
+      iq_ph_body: '문의 내용을 자유롭게 적어주세요.',
+      iq_ph_contact: '회신 받으실 이메일 또는 전화',
+      iq_ph_pw: '본인 글 확인·수정에 사용됩니다',
+      iq_close: '닫기',
+      iq_submit: '등록',
+      iq_lookup_help: '문의 번호와 본인이 설정한 비밀번호를 입력하세요.',
+      iq_lookup_id: '문의 번호',
+      iq_lookup_pw: '비밀번호',
+      iq_lookup_id_ph: '등록 시 발급받은 번호',
+      iq_lookup: '조회',
+      iq_back: '뒤로',
+      iq_save: '저장',
+      iq_delete: '삭제',
+    },
+    en: {
+      lang_toggle: '🌐 한국어',
+      admin: 'ADMIN',
+      admin_exit: 'EXIT ADMIN',
+      my_inquiry: 'MY INQUIRY',
+      contact: 'CONTACT',
+      intro: 'INTRO',
+      learn_more: 'LEARN MORE',
+      view_more: 'VIEW MORE',
+      get_in_touch: 'GET IN TOUCH',
+      inquiry_btn: 'CONTACT US',
+      sample_banner: '<b>Sample content</b> is being shown — your Supabase has no sections yet.',
+      sample_cta: 'Edit in admin page →',
+      sample_or: 'or',
+      sample_alt: 'Run sample-data.sql once in Supabase SQL Editor',
+      admin_bar: '🔧 <b>Admin mode</b> · Click the ✎ button on each section to edit',
+      admin_advanced: 'Advanced editor (slides · items · settings)',
+      admin_exit_btn: 'Exit',
+      loading: 'Loading…',
+      empty_sections: 'No sections yet. Please add them in the admin page.',
+      load_failed: 'Failed to load data. Please check your Supabase settings.',
+      empty_items: 'No items.',
+      footer_top: 'TOP',
+      footer_admin: 'ADMIN',
+      footer_designed: 'DESIGNED WITH CARE',
+      iem_title_suffix: ' — Edit',
+      iem_advanced: 'Advanced editor ↗',
+      iem_cancel: 'Cancel',
+      iem_save: 'Save',
+      iem_label_title: 'Title (한글)',
+      iem_label_subtitle: 'Subtitle (한글)',
+      iem_label_body: 'Body (한글) · line breaks preserved',
+      iem_label_image: 'Image',
+      iem_label_video: 'Video URL (YouTube · optional)',
+      iem_label_link_label: 'Button label (한글)',
+      iem_label_link_url: 'Button URL',
+      iem_typo_section: 'Typography (this section only)',
+      iem_label_title_font: 'Title font',
+      iem_label_title_scale: 'Title scale',
+      iem_label_body_font: 'Body font',
+      iem_label_body_scale: 'Body scale',
+      iem_save_done: 'Saved · reloading',
+      iem_save_fail: 'Save failed: ',
+      iem_section_ko: '🇰🇷 Korean',
+      iem_section_en: '🇬🇧 English',
+      iem_en_hint: 'Leave empty to auto-fall back to Korean in English mode',
+      iq_title_write: 'New Inquiry',
+      iq_title_lookup: 'View / Edit My Inquiry',
+      iq_help_write: 'Your inquiry is registered as a <b>private post</b> visible only to the admin. Use the <b>inquiry number</b> issued and the <b>password</b> you set to view, edit or delete your post later.',
+      iq_label_title: 'Title',
+      iq_label_body: 'Message',
+      iq_label_contact: 'Contact (email or phone, optional)',
+      iq_label_pw: 'Password (min. 4 chars)',
+      iq_ph_title: 'Subject',
+      iq_ph_body: 'Write your message freely.',
+      iq_ph_contact: 'Email or phone we can reply to',
+      iq_ph_pw: 'Used to view and edit your post',
+      iq_close: 'Close',
+      iq_submit: 'Submit',
+      iq_lookup_help: 'Enter your inquiry number and the password you set.',
+      iq_lookup_id: 'Inquiry No.',
+      iq_lookup_pw: 'Password',
+      iq_lookup_id_ph: 'The number issued at submission',
+      iq_lookup: 'Look up',
+      iq_back: 'Back',
+      iq_save: 'Save',
+      iq_delete: 'Delete',
+    },
+  };
+  function t(key) { return I18N[CURRENT_LANG][key] ?? I18N.ko[key] ?? key; }
+  // _en 컬럼 우선, 없으면 한글로 폴백
+  function pickLang(obj, key) {
+    if (!obj) return '';
+    if (CURRENT_LANG === 'en') {
+      const v = obj[key + '_en'];
+      if (v != null && String(v).trim() !== '') return v;
+    }
+    return obj[key] ?? '';
+  }
+
   // ================== Supabase 설정 ==================
   // ※ 아래 두 값만 본인 Supabase 프로젝트 값으로 교체하세요.
   const SUPABASE_URL = 'https://vhhfaeyhlubvhezyagwd.supabase.co';
@@ -846,69 +1000,91 @@
   function defaultSettings() {
     return {
       site_name: '볼드', site_tagline: 'BOLD',
+      site_name_en: 'BOLD', site_tagline_en: 'BOLD',
       footer_text: 'COPYRIGHT (c) BOLD ALL RIGHTS RESERVED.',
+      footer_text_en: 'COPYRIGHT (c) BOLD ALL RIGHTS RESERVED.',
       contact_email: 'hello@bold.kr',
       contact_phone: '010-0000-0000',
       contact_address: '전주시 덕진구',
+      contact_address_en: 'Deokjin-gu, Jeonju, South Korea',
       social_instagram: 'https://instagram.com/',
       theme_primary_color: '#0a1f44',
       theme_accent_color: '#ff6b1a',
       seo_description: 'BOLD — 대담한 브랜드',
+      seo_description_en: 'BOLD — A bold brand, a new sensibility.',
     };
   }
   function defaultSections() {
     return [
       { id:'s1', slug:'hero', type:'hero', sort_order:1,
         title:'BOLD', subtitle:'PORTFOLIO',
+        title_en:'BOLD', subtitle_en:'PORTFOLIO',
         body:'대담한 시선으로 이야기를 풀어냅니다.\n기획과 실행 사이, 그 균형점에서 태어난 스튜디오.',
-        link_label:'WORKS 보기', link_url:'#works', extra:{},
+        body_en:'We tell stories with a bold perspective.\nA studio born at the balance point between strategy and execution.',
+        link_label:'WORKS 보기', link_label_en:'SEE WORKS', link_url:'#works', extra:{},
         items:[
           { id:'h1', title:'Campaign 01', subtitle:'BRAND IDENTITY',
+            title_en:'Campaign 01', subtitle_en:'BRAND IDENTITY',
             image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1600&q=80',
             sort_order:1 },
           { id:'h2', title:'Editorial 02', subtitle:'ART DIRECTION',
+            title_en:'Editorial 02', subtitle_en:'ART DIRECTION',
             image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1600&q=80',
             sort_order:2 },
           { id:'h3', title:'Poster 03', subtitle:'GRAPHIC DESIGN',
+            title_en:'Poster 03', subtitle_en:'GRAPHIC DESIGN',
             image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1600&q=80',
             sort_order:3 },
         ]},
       { id:'s2', slug:'about', type:'text', sort_order:2,
         title:'ABOUT', subtitle:'브랜드 소개',
+        title_en:'ABOUT', subtitle_en:'About the studio',
         body:'BOLD는 전주에 기반을 둔 창작 스튜디오입니다.\n\n이야기와 이미지, 태도가 만나는 지점에서 브랜드를 설계합니다. 크기가 아닌 밀도로 승부하며, 한 번의 좋은 선택이 열 개의 평범함을 이긴다고 믿습니다.',
+        body_en:'BOLD is a creative studio based in Jeonju, South Korea.\n\nWe design brands at the intersection of story, image, and attitude. We compete on density, not on size — believing that one great decision beats ten mediocre ones.',
         items:[] },
       { id:'s3', slug:'works', type:'gallery', sort_order:3,
         title:'WORKS', subtitle:'포트폴리오',
+        title_en:'WORKS', subtitle_en:'Portfolio',
         body:'최근 진행한 프로젝트들입니다. 썸네일을 클릭하면 상세로 이동합니다.',
+        body_en:'A selection of our recent projects. Click a thumbnail to view details.',
         items:[
           { id:'w1', title:'Project 01', subtitle:'Brand Identity', tag:'NEW',
+            title_en:'Project 01', subtitle_en:'Brand Identity', tag_en:'NEW',
             image_url:'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80',
             link_url:'#', sort_order:1 },
           { id:'w2', title:'Project 02', subtitle:'Editorial',
+            title_en:'Project 02', subtitle_en:'Editorial',
             image_url:'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80',
             link_url:'#', sort_order:2 },
           { id:'w3', title:'Project 03', subtitle:'Campaign',
+            title_en:'Project 03', subtitle_en:'Campaign',
             image_url:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80',
             link_url:'#', sort_order:3 },
           { id:'w4', title:'Project 04', subtitle:'Art Direction',
+            title_en:'Project 04', subtitle_en:'Art Direction',
             image_url:'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=800&q=80',
             link_url:'#', sort_order:4 },
           { id:'w5', title:'Project 05', subtitle:'Poster', tag:'HOT',
+            title_en:'Project 05', subtitle_en:'Poster', tag_en:'HOT',
             image_url:'https://images.unsplash.com/photo-1534551767192-78b8dd45b51b?w=800&q=80',
             link_url:'#', sort_order:5 },
           { id:'w6', title:'Project 06', subtitle:'Packaging',
+            title_en:'Project 06', subtitle_en:'Packaging',
             image_url:'https://images.unsplash.com/photo-1561070791-2526d30994b8?w=800&q=80',
             link_url:'#', sort_order:6 },
         ]},
       { id:'s4', slug:'philosophy', type:'image_text', sort_order:4,
-        title:'PHILOSOPHY',
+        title:'PHILOSOPHY', title_en:'PHILOSOPHY',
         body:'우리의 작업은 장식이 아닌 전략에서 시작합니다.\n\n간결하지만 결코 비어있지 않은, 대담하지만 결코 무례하지 않은 균형을 추구합니다. 브랜드의 본질을 찾고, 그것을 오래 남을 형태로 번역합니다.',
+        body_en:'Our work begins with strategy, not decoration.\n\nWe pursue balance — concise yet never empty, bold yet never rude. We find the essence of a brand and translate it into a form built to last.',
         image_url:'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=1200&q=80',
         items:[] },
       { id:'s5', slug:'contact', type:'cta', sort_order:5,
         title:'CONTACT', subtitle:'함께 만들어요',
+        title_en:'CONTACT', subtitle_en:'Let\u2019s build something',
         body:'새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
-        link_label:'문의하기', link_url:'#inquiry',
+        body_en:'We welcome new collaborations and inquiries. Feel free to get in touch.',
+        link_label:'문의하기', link_label_en:'CONTACT US', link_url:'#inquiry',
         items:[] },
     ];
   }
@@ -918,22 +1094,29 @@
   const $$ = (s,p=document) => Array.from(p.querySelectorAll(s));
 
   function applySettings(s) {
-    document.title = `${s.site_name || '볼드'} · ${s.site_tagline || 'BOLD'}`;
-    $('#metaDescription').content = s.seo_description || '';
+    SETTINGS_CACHE = s;
+    const siteName    = pickLang(s, 'site_name')    || (CURRENT_LANG==='en' ? 'BOLD' : '볼드');
+    const siteTagline = pickLang(s, 'site_tagline') || 'BOLD';
+    const seoDesc     = pickLang(s, 'seo_description') || '';
+    const footerText  = pickLang(s, 'footer_text') || '';
+    const address     = pickLang(s, 'contact_address') || '';
+    document.title = `${siteName} · ${siteTagline}`;
+    document.documentElement.lang = (CURRENT_LANG === 'en') ? 'en' : 'ko';
+    $('#metaDescription').content = seoDesc;
     if (s.logo_url) {
-      $('#siteLogo').innerHTML = `<img src="${s.logo_url}" alt="${s.site_name||''}">`;
+      $('#siteLogo').innerHTML = `<img src="${s.logo_url}" alt="${siteName}">`;
     } else {
-      $('#siteLogo').textContent = s.site_tagline || 'BOLD';
+      $('#siteLogo').textContent = siteTagline;
     }
-    $('#asideLogo').textContent = s.site_tagline || 'BOLD';
-    $('#footerBrand').textContent = s.site_tagline || 'BOLD';
-    $('#footerCopyright').textContent = s.footer_text || '';
-    $('#footerDesc').textContent = s.seo_description || '';
+    $('#asideLogo').textContent = siteTagline;
+    $('#footerBrand').textContent = siteTagline;
+    $('#footerCopyright').textContent = footerText;
+    $('#footerDesc').textContent = seoDesc;
 
     const contactUl = $('#footerContact'); contactUl.innerHTML = '';
     if (s.contact_email) contactUl.insertAdjacentHTML('beforeend', `<li><a href="mailto:${s.contact_email}">${s.contact_email}</a></li>`);
     if (s.contact_phone) contactUl.insertAdjacentHTML('beforeend', `<li>${s.contact_phone}</li>`);
-    if (s.contact_address) contactUl.insertAdjacentHTML('beforeend', `<li>${s.contact_address}</li>`);
+    if (address) contactUl.insertAdjacentHTML('beforeend', `<li>${escape(address)}</li>`);
 
     const socialUl = $('#footerSocial'); socialUl.innerHTML = '';
     if (s.social_instagram) socialUl.insertAdjacentHTML('beforeend', `<li><a href="${s.social_instagram}" target="_blank">INSTAGRAM</a></li>`);
@@ -949,10 +1132,10 @@
     const aside = $('#asideNav');
     nav.innerHTML = ''; aside.innerHTML = '';
     sections.forEach(s => {
-      const label = (s.title || s.slug || '').toString();
+      const label = (pickLang(s,'title') || s.slug || '').toString();
       if (!label) return;
-      nav.insertAdjacentHTML('beforeend', `<a href="#${s.slug}">${label}</a>`);
-      aside.insertAdjacentHTML('beforeend', `<a href="#${s.slug}">${label}</a>`);
+      nav.insertAdjacentHTML('beforeend', `<a href="#${s.slug}">${escape(label)}</a>`);
+      aside.insertAdjacentHTML('beforeend', `<a href="#${s.slug}">${escape(label)}</a>`);
     });
   }
 
@@ -1092,15 +1275,18 @@
     const videoUrl = s.extra && s.extra.video_url;
     const videoBlock = renderVideoEmbed(videoUrl);
     const hasVideo = !!videoBlock;
-    const typeLabel = {
-      hero:'대문',
-      text:'본문',
-      image_text:'이미지+글',
-      gallery:'갤러리',
-      cta:'CTA'
-    }[s.type||'text'] || s.type;
+    const sTitle    = pickLang(s, 'title');
+    const sSubtitle = pickLang(s, 'subtitle');
+    const sBody     = pickLang(s, 'body');
+    const sLinkLbl  = pickLang(s, 'link_label');
+    const typeLabelMap = (CURRENT_LANG === 'en') ? {
+      hero:'Hero', text:'Text', image_text:'Image+Text', gallery:'Gallery', cta:'CTA'
+    } : {
+      hero:'대문', text:'본문', image_text:'이미지+글', gallery:'갤러리', cta:'CTA'
+    };
+    const typeLabel = typeLabelMap[s.type||'text'] || s.type;
     const editHint = `
-      <button class="edit-hint" data-section-id="${escape(s.id)}" title="'${escape(s.title||s.slug)}' 편집">
+      <button class="edit-hint" data-section-id="${escape(s.id)}" title="'${escape(sTitle||s.slug)}' edit">
         <svg class="eh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
         № ${String(idx+1).padStart(2,'0')} · ${escape(s.slug)}
         <span class="eh-type">${typeLabel}</span>
@@ -1108,8 +1294,8 @@
     const header = `
       <div class="block-header reveal">
         <span class="block-index">№ ${String(idx+1).padStart(2,'0')}</span>
-        <h2 class="block-title">${escape(s.title||'')}</h2>
-        ${s.subtitle ? `<span class="block-subtitle">${escape(s.subtitle)}</span>` : ''}
+        <h2 class="block-title">${escape(sTitle||'')}</h2>
+        ${sSubtitle ? `<span class="block-subtitle">${escape(sSubtitle)}</span>` : ''}
       </div>`;
 
     switch ((s.type||'text')) {
@@ -1119,26 +1305,28 @@
         if (hasVideo) {
           visual = videoBlock;
         } else if (heroSlides.length >= 1) {
+          const firstTitle    = pickLang(heroSlides[0],'title');
+          const firstSubtitle = pickLang(heroSlides[0],'subtitle');
           visual = `
             <div class="hero-slideshow reveal" data-autoplay="4500">
               ${heroSlides.map((it,i) => `
                 <div class="hslide${i===0?' active':''}" style="background-image:url('${it.image_url}');"></div>
               `).join('')}
               ${heroSlides.length > 1 ? `
-                <button class="slide-arrow prev" aria-label="이전">
+                <button class="slide-arrow prev" aria-label="prev">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
-                <button class="slide-arrow next" aria-label="다음">
+                <button class="slide-arrow next" aria-label="next">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
                 <div class="slide-dots">
-                  ${heroSlides.map((_,i) => `<button class="sdot${i===0?' active':''}" data-idx="${i}" aria-label="슬라이드 ${i+1}"></button>`).join('')}
+                  ${heroSlides.map((_,i) => `<button class="sdot${i===0?' active':''}" data-idx="${i}" aria-label="slide ${i+1}"></button>`).join('')}
                 </div>
               ` : ''}
-              ${heroSlides[0].title || heroSlides[0].subtitle ? `
+              ${firstTitle || firstSubtitle ? `
                 <div class="slide-caption" id="slideCaption_${s.id}">
-                  ${heroSlides[0].title ? `<strong>${escape(heroSlides[0].title)}</strong>` : ''}
-                  ${heroSlides[0].subtitle ? `<small>${escape(heroSlides[0].subtitle)}</small>` : ''}
+                  ${firstTitle ? `<strong>${escape(firstTitle)}</strong>` : ''}
+                  ${firstSubtitle ? `<small>${escape(firstSubtitle)}</small>` : ''}
                 </div>` : ''}
             </div>`;
         } else if (s.image_url) {
@@ -1150,12 +1338,12 @@
         <section ${anchor} class="hero"${heroStyle ? ` style="${heroStyle}"` : ''}>
           ${editHint}
           <div>
-            <h1 class="hero-title reveal">${escape(s.title||'')}${s.subtitle ? `<br><em>${escape(s.subtitle)}</em>` : ''}</h1>
-            <p class="hero-sub reveal"><small>INTRO</small>${nl2br(escape(s.body||''))}</p>
-            ${s.link_url ? `<a class="btn-bold reveal" style="border-color:var(--fg); color:var(--fg);" href="${s.link_url}">${escape(s.link_label||'LEARN MORE')}</a>`: ''}
+            <h1 class="hero-title reveal">${escape(sTitle||'')}${sSubtitle ? `<br><em>${escape(sSubtitle)}</em>` : ''}</h1>
+            <p class="hero-sub reveal"><small>${escape(t('intro'))}</small>${nl2br(escape(sBody||''))}</p>
+            ${s.link_url ? `<a class="btn-bold reveal" style="border-color:var(--fg); color:var(--fg);" href="${s.link_url}">${escape(sLinkLbl||t('learn_more'))}</a>`: ''}
           </div>
           ${visual}
-          <div class="hero-marquee"><span>${(escape(s.title||'BOLD')+' · ').repeat(20)}</span></div>
+          <div class="hero-marquee"><span>${(escape(sTitle||'BOLD')+' · ').repeat(20)}</span></div>
         </section>`;
       }
 
@@ -1164,7 +1352,7 @@
         <section ${anchor} class="block"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           ${header}
-          <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
+          <div class="text-body reveal">${nl2br(escape(sBody||''))}</div>
           ${videoBlock}
         </section>`;
 
@@ -1178,49 +1366,54 @@
               ? renderVideoEmbed(videoUrl, { className: 'image-text-video' })
               : (s.image_url ? `<img src="${s.image_url}" alt="">` : `<div style="aspect-ratio:4/5; background:var(--bg-soft);"></div>`)}
             <div class="text">
-              <h3>${escape(s.title||'')}</h3>
-              <p>${nl2br(escape(s.body||''))}</p>
-              ${s.link_url ? `<a class="btn-bold" style="margin-top:22px; color:var(--fg); border-color:var(--fg);" href="${s.link_url}">${escape(s.link_label||'VIEW MORE')}</a>`:''}
+              <h3>${escape(sTitle||'')}</h3>
+              <p>${nl2br(escape(sBody||''))}</p>
+              ${s.link_url ? `<a class="btn-bold" style="margin-top:22px; color:var(--fg); border-color:var(--fg);" href="${s.link_url}">${escape(sLinkLbl||t('view_more'))}</a>`:''}
             </div>
           </div>
         </section>`;
 
       case 'gallery':
-        const cards = (s.items||[]).map(i => `
+        const cards = (s.items||[]).map(i => {
+          const iTitle = pickLang(i,'title');
+          const iSub   = pickLang(i,'subtitle');
+          const iTag   = pickLang(i,'tag');
+          return `
           <a class="card reveal" href="${i.link_url||'#'}">
             <div class="ph" style="background-image:url('${i.image_url||''}');">
-              ${i.tag ? `<span class="card-tag">${escape(i.tag)}</span>`:''}
+              ${iTag ? `<span class="card-tag">${escape(iTag)}</span>`:''}
             </div>
-            <h4>${escape(i.title||'')}</h4>
-            ${i.subtitle ? `<p>${escape(i.subtitle)}</p>`:''}
+            <h4>${escape(iTitle||'')}</h4>
+            ${iSub ? `<p>${escape(iSub)}</p>`:''}
             ${i.price ? `<div class="price">${escape(i.price)}</div>`:''}
-          </a>`).join('');
+          </a>`;
+        }).join('');
         return `
         <section ${anchor} class="block"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           ${header}
-          ${s.body ? `<p class="reveal" style="font-family:var(--body-font, var(--serif)); font-size:calc(16px * var(--body-scale, 1)); max-width:620px; margin:-24px 0 40px; color:#333;">${escape(s.body)}</p>`: ''}
+          ${sBody ? `<p class="reveal" style="font-family:var(--body-font, var(--serif)); font-size:calc(16px * var(--body-scale, 1)); max-width:620px; margin:-24px 0 40px; color:#333;">${escape(sBody)}</p>`: ''}
           ${videoBlock}
-          <div class="gallery-grid">${cards || `<div class="empty-note" style="grid-column:1/-1;">항목이 없습니다.</div>`}</div>
+          <div class="gallery-grid">${cards || `<div class="empty-note" style="grid-column:1/-1;">${escape(t('empty_items'))}</div>`}</div>
         </section>`;
 
       case 'cta': {
         const isContact = (s.slug || '').toLowerCase() === 'contact';
         // 레거시 라벨('이메일 보내기' / 'mailto:...') 자동 정규화 → '문의하기'
-        const rawLabel = (s.link_label || '').trim();
+        const rawLabel = (sLinkLbl || '').trim();
         const isLegacyMailLabel = !rawLabel || rawLabel === '이메일 보내기' || rawLabel === '문의 남기기' || /^mailto:/i.test(rawLabel);
-        const contactLabel = isLegacyMailLabel ? '문의하기' : rawLabel;
+        const contactLabel = isLegacyMailLabel ? t('inquiry_btn') : rawLabel;
         const ctaButton = isContact
           ? `<button class="btn-bold reveal" type="button" data-open-inquiry="1">${escape(contactLabel)}</button>`
-          : (s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(rawLabel || 'GET IN TOUCH')}</a>` : '');
+          : (s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(rawLabel || t('get_in_touch'))}</a>` : '');
         return `
         <section ${anchor} class="cta"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           <div class="block-header reveal" style="justify-content:center; border-color:rgba(255,255,255,.2);">
             <span class="block-index" style="color:rgba(255,255,255,.6);">№ ${String(idx+1).padStart(2,'0')}</span>
-            <h2 class="block-title">${escape(s.title||'')}</h2>
+            <h2 class="block-title">${escape(sTitle||'')}</h2>
           </div>
-          <p class="cta-text reveal">${nl2br(escape(s.body||''))}</p>
+          <p class="cta-text reveal">${nl2br(escape(sBody||''))}</p>
           ${videoBlock}
           ${ctaButton}
         </section>`;
@@ -1231,7 +1424,7 @@
         <section ${anchor} class="block"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
           ${header}
-          <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
+          <div class="text-body reveal">${nl2br(escape(sBody||''))}</div>
           ${videoBlock}
         </section>`;
     }
@@ -1265,8 +1458,10 @@
       const updateCaption = (n) => {
         if (!captionEl) return;
         const it = heroItems[n];
-        captionEl.innerHTML = (it?.title ? `<strong>${escapeHTML(it.title)}</strong>` : '')
-          + (it?.subtitle ? `<small>${escapeHTML(it.subtitle)}</small>` : '');
+        const ttl = pickLang(it,'title');
+        const sub = pickLang(it,'subtitle');
+        captionEl.innerHTML = (ttl ? `<strong>${escapeHTML(ttl)}</strong>` : '')
+          + (sub ? `<small>${escapeHTML(sub)}</small>` : '');
       };
       let idx = 0, timer;
       const delay = parseInt(root.dataset.autoplay || '4500', 10);
@@ -1298,23 +1493,77 @@
 
   // ================== 실행 ==================
   let SECTIONS_CACHE = [];
+  let SETTINGS_CACHE = {};
   let IS_SAMPLE_MODE = false;
+
+  // 정적 UI 텍스트(헤더 토글·문의 모달·관리자 바·푸터 링크 등) 갱신
+  function applyStaticI18n() {
+    document.documentElement.lang = (CURRENT_LANG === 'en') ? 'en' : 'ko';
+    // 1) data-i18n / data-i18n-html 속성 기반 일괄 갱신
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = t(el.dataset.i18nHtml);
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      el.placeholder = t(el.dataset.i18nPh);
+    });
+    // 2) 관리자 토글 버튼 라벨은 모드 상태에 따라 다름
+    const adminLink = $('#btnAdminToggle');
+    if (adminLink) adminLink.textContent = document.body.classList.contains('admin-mode') ? t('admin_exit') : t('admin');
+  }
+
+  function rerenderAll() {
+    applySettings(SETTINGS_CACHE);
+    renderNav(SECTIONS_CACHE);
+    const html = SECTIONS_CACHE.map((s,i)=> renderSection(s,i,IS_SAMPLE_MODE)).join('');
+    $('#main').innerHTML = html || `<div class="empty-note">${escape(t('empty_sections'))}</div>`;
+    initReveal();
+    initSlideshows(SECTIONS_CACHE);
+    bindEditHints();
+    applyStaticI18n();
+  }
+
+  function bindEditHints() {
+    document.querySelectorAll('.edit-hint').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!document.body.classList.contains('admin-mode')) return;
+        openIem(btn.dataset.sectionId);
+      });
+    });
+  }
+
+  // 언어 토글
+  function setLang(lang) {
+    CURRENT_LANG = (lang === 'en') ? 'en' : 'ko';
+    localStorage.setItem(LANG_KEY, CURRENT_LANG);
+    rerenderAll();
+  }
+  document.getElementById('btnLangToggle')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    setLang(CURRENT_LANG === 'en' ? 'ko' : 'en');
+  });
+
   try {
     const [settings, sectionsResult] = await Promise.all([fetchSettings(), fetchSections()]);
     SECTIONS_CACHE = sectionsResult.data;
     IS_SAMPLE_MODE = sectionsResult.isSample;
+    SETTINGS_CACHE = settings;
     applySettings(settings);
     renderNav(SECTIONS_CACHE);
     if (IS_SAMPLE_MODE) $('#sampleBanner').classList.add('on');
     const html = SECTIONS_CACHE.map((s,i)=> renderSection(s,i,IS_SAMPLE_MODE)).join('');
-    $('#main').innerHTML = html || `<div class="empty-note">섹션이 비어있습니다. 관리자 페이지에서 추가해 주세요.</div>`;
+    $('#main').innerHTML = html || `<div class="empty-note">${escape(t('empty_sections'))}</div>`;
     initReveal();
     initSlideshows(SECTIONS_CACHE);
+    applyStaticI18n();
     initAdminMode();
     initInquiryModal();
   } catch (e) {
     console.error(e);
-    $('#main').innerHTML = `<div class="empty-note">데이터 로딩 실패. Supabase 설정을 확인해 주세요.</div>`;
+    $('#main').innerHTML = `<div class="empty-note">${escape(t('load_failed'))}</div>`;
   }
 
   // ================== 관리자 모드 (인라인 편집) ==================
@@ -1340,7 +1589,7 @@
     // 세션 유지: 직전에 로그인했으면 바로 켬
     if (sessionStorage.getItem(AUTH_KEY) === '1') {
       document.body.classList.add('admin-mode');
-      btnToggle.textContent = '관리자 종료';
+      btnToggle.textContent = t('admin_exit');
     }
 
     // 모달 이벤트
@@ -1374,12 +1623,12 @@
       return;
     }
     document.body.classList.add('admin-mode');
-    $('#btnAdminToggle').textContent = '관리자 종료';
+    $('#btnAdminToggle').textContent = t('admin_exit');
   }
 
   function exitAdminMode() {
     document.body.classList.remove('admin-mode');
-    $('#btnAdminToggle').textContent = '관리자';
+    $('#btnAdminToggle').textContent = t('admin');
     closeIem();
   }
 
@@ -1388,9 +1637,10 @@
 
   function openIem(sectionId) {
     const s = SECTIONS_CACHE.find(x => String(x.id) === String(sectionId));
-    if (!s) return iemToast('섹션을 찾을 수 없습니다','err');
+    if (!s) return iemToast(CURRENT_LANG==='en' ? 'Section not found' : '섹션을 찾을 수 없습니다','err');
     CURRENT_EDIT = s;
-    $('#iemTitle').textContent = (s.title || s.slug || '섹션') + ' 편집';
+    const baseTitle = pickLang(s,'title') || s.slug || (CURRENT_LANG==='en' ? 'Section' : '섹션');
+    $('#iemTitle').textContent = baseTitle + t('iem_title_suffix');
     $('#iemSlug').textContent = `#${s.slug} · ${s.type}`;
 
     const isHero = s.type === 'hero';
@@ -1405,7 +1655,13 @@
       cta: '배경색이 진한 행동 유도 박스입니다'
     }[s.type] || '';
 
+    const koHeader = `🇰🇷 ${CURRENT_LANG==='en' ? 'Korean (default)' : '한국어 (기본)'}`;
+    const enHeader = `🇬🇧 ${CURRENT_LANG==='en' ? 'English' : 'English (영문)'}`;
+    const enHint = CURRENT_LANG==='en'
+      ? 'Leave empty to fall back to Korean in English mode.'
+      : '비워두면 영어 모드에서 한글 값으로 자동 폴백됩니다.';
     $('#iemBody').innerHTML = `
+      <div style="font-family:var(--display); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-top:-4px;">${koHeader}</div>
       <div class="iem-field">
         <label>제목 (Title)</label>
         <input type="text" id="iem_title" value="${escapeAttr(s.title||'')}">
@@ -1418,9 +1674,43 @@
         <label>본문 (Body) · 줄바꿈 그대로 적용</label>
         <textarea id="iem_body_text">${escape(s.body||'')}</textarea>
       </div>
+      ${showLink ? `
+      <div class="iem-grid-2">
+        <div class="iem-field">
+          <label>버튼 라벨</label>
+          <input type="text" id="iem_link_label" value="${escapeAttr(s.link_label||'')}">
+        </div>
+        <div class="iem-field">
+          <label>버튼 링크 URL</label>
+          <input type="text" id="iem_link_url" value="${escapeAttr(s.link_url||'')}" placeholder="#anchor 또는 https://...">
+        </div>
+      </div>` : ''}
+
+      <div style="border-top:1px dashed #dfe2e9; padding-top:14px; margin-top:6px;">
+        <div style="font-family:var(--display); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:4px;">${enHeader}</div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.5;">${enHint}</div>
+        <div class="iem-field">
+          <label>Title (English)</label>
+          <input type="text" id="iem_title_en" value="${escapeAttr(s.title_en||'')}">
+        </div>
+        <div class="iem-field">
+          <label>Subtitle (English)</label>
+          <input type="text" id="iem_subtitle_en" value="${escapeAttr(s.subtitle_en||'')}">
+        </div>
+        <div class="iem-field">
+          <label>Body (English) · line breaks preserved</label>
+          <textarea id="iem_body_text_en">${escape(s.body_en||'')}</textarea>
+        </div>
+        ${showLink ? `
+        <div class="iem-field">
+          <label>Button label (English)</label>
+          <input type="text" id="iem_link_label_en" value="${escapeAttr(s.link_label_en||'')}">
+        </div>` : ''}
+      </div>
+
       ${showImage ? `
       <div class="iem-field">
-        <label>이미지</label>
+        <label>이미지 / Image</label>
         <input type="text" id="iem_image_url" value="${escapeAttr(s.image_url||'')}" placeholder="https://... 또는 아래에서 업로드">
         <div class="iem-upload-row">
           <input type="file" accept="image/*" id="iem_image_file">
@@ -1439,17 +1729,6 @@
           입력 시 ${({hero:'대문 슬라이드/이미지 자리에', image_text:'이미지 자리에', text:'본문 아래에', gallery:'갤러리 위에', cta:'버튼 위에'})[s.type] || '본문 아래에'} 16:9 영상 플레이어가 표시됩니다.
         </div>
       </div>
-      ${showLink ? `
-      <div class="iem-grid-2">
-        <div class="iem-field">
-          <label>버튼 라벨</label>
-          <input type="text" id="iem_link_label" value="${escapeAttr(s.link_label||'')}">
-        </div>
-        <div class="iem-field">
-          <label>버튼 링크 URL</label>
-          <input type="text" id="iem_link_url" value="${escapeAttr(s.link_url||'')}" placeholder="#anchor 또는 https://...">
-        </div>
-      </div>` : ''}
       <div style="border-top:1px dashed #dfe2e9; padding-top:14px; margin-top:4px;">
         <div style="font-family:var(--display); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:10px;">타이포그래피 (이 섹션만 적용)</div>
         <div class="iem-grid-2">
@@ -1526,6 +1805,9 @@
       title: $('#iem_title').value,
       subtitle: $('#iem_subtitle').value || null,
       body: $('#iem_body_text').value || null,
+      title_en:    $('#iem_title_en')?.value      || null,
+      subtitle_en: $('#iem_subtitle_en')?.value   || null,
+      body_en:     $('#iem_body_text_en')?.value  || null,
     };
     const showImage = s.type !== 'hero' && s.type !== 'gallery';
     if (showImage) payload.image_url = ($('#iem_image_url').value || null);
@@ -1533,6 +1815,7 @@
     if (showLink) {
       payload.link_label = $('#iem_link_label').value || null;
       payload.link_url = $('#iem_link_url').value || null;
+      payload.link_label_en = $('#iem_link_label_en')?.value || null;
     }
     // extra jsonb 머지 (타이포그래피 + 비디오)
     const titleFont  = $('#iem_title_font')?.value || '';
