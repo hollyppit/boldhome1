@@ -596,6 +596,32 @@
   /* 스크롤 리빌 */
   .reveal { opacity:0; transform: translateY(24px); transition: opacity .8s, transform .8s; }
   .reveal.on { opacity:1; transform:none; }
+
+  /* 섹션 비디오 임베드 (YouTube iframe) */
+  .section-video {
+    position: relative; width: 100%; max-width: 1100px;
+    margin: 28px auto 12px; aspect-ratio: 16/9;
+    background: #000; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,.18);
+  }
+  .section-video iframe {
+    position:absolute; inset:0; width:100%; height:100%; border:0;
+  }
+  .hero .section-video {
+    position:absolute; top:80px; right:28px;
+    width: 40vw; max-width: 520px; margin:0;
+    box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  }
+  @media (max-width: 860px) {
+    .hero .section-video { position: static; width: 100%; max-width: 100%; margin: 24px 0 0; }
+  }
+  .image-text-video {
+    position: relative; width:100%; aspect-ratio: 4/5;
+    background:#000; border-radius:6px; overflow:hidden;
+  }
+  .image-text-video iframe {
+    position:absolute; inset:0; width:100%; height:100%; border:0;
+  }
 </style>
 </head>
 <body>
@@ -1008,6 +1034,28 @@
     { value: '2',    label: '최대 (200%)' },
   ];
 
+  // YouTube URL → 11자리 video ID 추출. 실패 시 null
+  function parseYouTubeId(url) {
+    if (!url) return null;
+    const s = String(url).trim();
+    // 이미 11자리 ID만 들어왔을 때
+    if (/^[\w-]{11}$/.test(s)) return s;
+    const m = s.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|v\/)|youtu\.be\/)([\w-]{11})/);
+    return m ? m[1] : null;
+  }
+  function renderVideoEmbed(url, opts={}) {
+    const id = parseYouTubeId(url);
+    if (!id) return '';
+    const cls = opts.className || 'section-video reveal';
+    const params = 'rel=0&modestbranding=1';
+    return `<div class="${cls}">
+      <iframe src="https://www.youtube.com/embed/${id}?${params}"
+              title="YouTube video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen loading="lazy"></iframe>
+    </div>`;
+  }
+
   function buildTypoStyle(extra) {
     const ex = extra || {};
     const parts = [];
@@ -1041,6 +1089,9 @@
   function renderSection(s, idx, isSample) {
     const anchor = `id="${s.slug}"`;
     const typoStyle = buildTypoStyle(s.extra);
+    const videoUrl = s.extra && s.extra.video_url;
+    const videoBlock = renderVideoEmbed(videoUrl);
+    const hasVideo = !!videoBlock;
     const typeLabel = {
       hero:'대문',
       text:'본문',
@@ -1065,7 +1116,9 @@
       case 'hero': {
         const heroSlides = (s.items || []).filter(i => i.image_url);
         let visual = '';
-        if (heroSlides.length >= 1) {
+        if (hasVideo) {
+          visual = videoBlock;
+        } else if (heroSlides.length >= 1) {
           visual = `
             <div class="hero-slideshow reveal" data-autoplay="4500">
               ${heroSlides.map((it,i) => `
@@ -1091,7 +1144,7 @@
         } else if (s.image_url) {
           visual = `<div class="hero-visual reveal" style="background-image:url('${s.image_url}');"></div>`;
         }
-        const heroBg = (s.image_url || heroSlides.length) ? '' : 'background:linear-gradient(180deg,var(--bg),var(--bg-soft));';
+        const heroBg = (s.image_url || heroSlides.length || hasVideo) ? '' : 'background:linear-gradient(180deg,var(--bg),var(--bg-soft));';
         const heroStyle = [typoStyle, heroBg].filter(Boolean).join(';');
         return `
         <section ${anchor} class="hero"${heroStyle ? ` style="${heroStyle}"` : ''}>
@@ -1112,6 +1165,7 @@
           ${editHint}
           ${header}
           <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
+          ${videoBlock}
         </section>`;
 
       case 'image_text':
@@ -1120,7 +1174,9 @@
           ${editHint}
           ${header}
           <div class="image-text reveal">
-            ${s.image_url ? `<img src="${s.image_url}" alt="">` : `<div style="aspect-ratio:4/5; background:var(--bg-soft);"></div>`}
+            ${hasVideo
+              ? renderVideoEmbed(videoUrl, { className: 'image-text-video' })
+              : (s.image_url ? `<img src="${s.image_url}" alt="">` : `<div style="aspect-ratio:4/5; background:var(--bg-soft);"></div>`)}
             <div class="text">
               <h3>${escape(s.title||'')}</h3>
               <p>${nl2br(escape(s.body||''))}</p>
@@ -1144,6 +1200,7 @@
           ${editHint}
           ${header}
           ${s.body ? `<p class="reveal" style="font-family:var(--body-font, var(--serif)); font-size:calc(16px * var(--body-scale, 1)); max-width:620px; margin:-24px 0 40px; color:#333;">${escape(s.body)}</p>`: ''}
+          ${videoBlock}
           <div class="gallery-grid">${cards || `<div class="empty-note" style="grid-column:1/-1;">항목이 없습니다.</div>`}</div>
         </section>`;
 
@@ -1160,6 +1217,7 @@
             <h2 class="block-title">${escape(s.title||'')}</h2>
           </div>
           <p class="cta-text reveal">${nl2br(escape(s.body||''))}</p>
+          ${videoBlock}
           ${ctaButton}
         </section>`;
       }
@@ -1170,6 +1228,7 @@
           ${editHint}
           ${header}
           <div class="text-body reveal">${nl2br(escape(s.body||''))}</div>
+          ${videoBlock}
         </section>`;
     }
   }
@@ -1369,6 +1428,13 @@
         ${isHero ? '대문 슬라이드 이미지는 <a href="admin.html" target="_blank">고급 편집 페이지</a> → hero 섹션 열기 → "대문 슬라이드 이미지"에서 추가·교체하세요.' : ''}
         ${isGallery ? '갤러리 카드는 <a href="admin.html" target="_blank">고급 편집 페이지</a> → works 섹션 열기 → "갤러리 아이템"에서 추가·교체하세요.' : ''}
       </div>`}
+      <div class="iem-field">
+        <label>비디오 URL (YouTube · 선택)</label>
+        <input type="text" id="iem_video_url" value="${escapeAttr(s.extra?.video_url||'')}" placeholder="https://youtu.be/... 또는 https://www.youtube.com/watch?v=...">
+        <div style="font-size:11px; color:var(--muted); margin-top:4px; line-height:1.6;">
+          입력 시 ${({hero:'대문 슬라이드/이미지 자리에', image_text:'이미지 자리에', text:'본문 아래에', gallery:'갤러리 위에', cta:'버튼 위에'})[s.type] || '본문 아래에'} 16:9 영상 플레이어가 표시됩니다.
+        </div>
+      </div>
       ${showLink ? `
       <div class="iem-grid-2">
         <div class="iem-field">
@@ -1464,16 +1530,18 @@
       payload.link_label = $('#iem_link_label').value || null;
       payload.link_url = $('#iem_link_url').value || null;
     }
-    // 타이포그래피 (extra jsonb 머지)
+    // extra jsonb 머지 (타이포그래피 + 비디오)
     const titleFont  = $('#iem_title_font')?.value || '';
     const titleScale = $('#iem_title_scale')?.value || '';
     const bodyFont   = $('#iem_body_font')?.value || '';
     const bodyScale  = $('#iem_body_scale')?.value || '';
+    const videoUrl   = ($('#iem_video_url')?.value || '').trim();
     const nextExtra = { ...(s.extra || {}) };
     if (titleFont)  nextExtra.title_font = titleFont;  else delete nextExtra.title_font;
     if (titleScale) nextExtra.title_scale = Number(titleScale); else delete nextExtra.title_scale;
     if (bodyFont)   nextExtra.body_font = bodyFont;   else delete nextExtra.body_font;
     if (bodyScale)  nextExtra.body_scale = Number(bodyScale);  else delete nextExtra.body_scale;
+    if (videoUrl)   nextExtra.video_url = videoUrl;   else delete nextExtra.video_url;
     payload.extra = nextExtra;
     try {
       const { error } = await supabase.from('sections').update(payload).eq('id', s.id);
