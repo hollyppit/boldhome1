@@ -146,6 +146,39 @@
   .icon-action:hover { border-color:var(--line); color:var(--fg); }
   .icon-action svg { width:15px; height:15px; }
 
+  /* 문의 게시판 */
+  .inq-row {
+    display:grid; grid-template-columns: 56px 1fr 200px 150px;
+    gap: 12px; align-items:center;
+    padding: 14px 18px; border-bottom:1px solid var(--line); cursor:pointer;
+    transition: background .15s;
+  }
+  .inq-row:hover { background:#15151a; }
+  .inq-row.unread { background:#16181f; }
+  .inq-row.unread:hover { background:#1a1d26; }
+  .inq-id { font-family:var(--mono); font-size:12px; color:var(--muted); }
+  .inq-title { font-size:14px; font-weight:600; color:var(--fg); }
+  .inq-title small { display:block; color:var(--muted); font-size:11px; margin-top:2px; font-weight:400;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px; }
+  .inq-contact { font-size:12px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .inq-date { font-size:11px; color:var(--muted); font-family:var(--mono); }
+  .inq-flag {
+    display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px;
+    font-weight:700; letter-spacing:.05em; margin-left:6px;
+  }
+  .inq-flag.unread { background:var(--accent); color:#fff; }
+  .inq-flag.read   { background:#23252b; color:var(--muted); border:1px solid var(--line); }
+  .inq-detail {
+    grid-column: 1 / -1; padding: 16px 18px 20px; background:#0c0d10;
+    border-top:1px solid var(--line); display:flex; flex-direction:column; gap:14px;
+  }
+  .inq-body {
+    background:var(--panel2); padding:14px 16px; border-radius:8px;
+    font-size:14px; line-height:1.7; white-space:pre-wrap; color:#e6e6ea;
+  }
+  .inq-meta { font-size:11px; color:var(--muted); font-family:var(--mono); }
+  .inq-detail-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
   @media (max-width: 860px) {
     .shell { grid-template-columns: 1fr; }
     .sidebar { flex-direction:row; overflow-x:auto; padding: 12px; border-right:0; border-bottom:1px solid var(--line); }
@@ -186,6 +219,10 @@
     </a>
     <a href="#" class="side-link" data-tab="sections">
       <span class="dot"></span> 섹션 관리
+    </a>
+    <a href="#" class="side-link" data-tab="inquiries">
+      <span class="dot"></span> 문의 게시판
+      <span id="inqUnreadBadge" style="margin-left:auto; background:var(--accent); color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; display:none;">0</span>
     </a>
     <a href="#" class="side-link" data-tab="export">
       <span class="dot"></span> 내보내기 / 가져오기
@@ -280,6 +317,25 @@
       </div>
 
       <div id="sectionList" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- =============== 탭: 문의 게시판 =============== -->
+    <div class="tab hidden" data-tab="inquiries">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <div>
+          <h1>문의 게시판</h1>
+          <p class="sub">사용자가 비밀글로 남긴 문의입니다. 본인 확인은 작성자가 직접, 관리자는 모두 열람·삭제 가능.</p>
+        </div>
+        <button class="btn" id="btnReloadInquiries">새로고침</button>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div id="inquiryList" style="max-height: 70vh; overflow:auto;">
+          <div style="padding: 28px 22px; color:var(--muted); font-size:13px; text-align:center;">
+            불러오는 중…
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- =============== 탭: 내보내기/가져오기 =============== -->
@@ -450,6 +506,7 @@ async function showApp() {
   $('#adminShell').classList.remove('hidden');
   await loadSettings();
   await loadSections();
+  loadInquiries();
 }
 function showLogin() {
   $('#loginShell').classList.remove('hidden');
@@ -980,6 +1037,160 @@ $('#btnImport').onclick = async () => {
   toast('가져오기 완료');
   await loadSettings(); await loadSections();
 };
+
+// ================== 문의 게시판 ==================
+let INQUIRIES_CACHE = [];
+let inqExpandedId = null;
+
+function fmtDateTime(s) {
+  if (!s) return '';
+  try {
+    const d = new Date(s);
+    const pad = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } catch { return s; }
+}
+
+async function loadInquiries() {
+  if (!configured) return;
+  const list = $('#inquiryList');
+  list.innerHTML = `<div style="padding:28px 22px; color:var(--muted); font-size:13px; text-align:center;">불러오는 중…</div>`;
+  try {
+    const { data, error } = await supabase.rpc('list_inquiries', { p_admin_pw: ADMIN_PW });
+    if (error) throw error;
+    INQUIRIES_CACHE = data || [];
+    renderInquiries();
+  } catch (err) {
+    list.innerHTML = `<div style="padding:28px 22px; color:#ff8b85; font-size:13px; text-align:center; line-height:1.7;">
+      불러오기 실패: ${esc(err.message || String(err))}<br>
+      <small style="color:var(--muted);">inquiries-schema.sql을 SQL Editor에서 1회 실행했는지 확인해 주세요.</small>
+    </div>`;
+  }
+}
+
+function renderInquiries() {
+  const list = $('#inquiryList');
+  const unreadCount = INQUIRIES_CACHE.filter(i => !i.is_read).length;
+  const badge = $('#inqUnreadBadge');
+  if (badge) {
+    if (unreadCount > 0) { badge.style.display = ''; badge.textContent = String(unreadCount); }
+    else                 { badge.style.display = 'none'; }
+  }
+
+  if (!INQUIRIES_CACHE.length) {
+    list.innerHTML = `<div style="padding:36px 22px; color:var(--muted); font-size:13px; text-align:center;">
+      받은 문의가 없습니다.
+    </div>`;
+    return;
+  }
+  list.innerHTML = INQUIRIES_CACHE.map(row => renderInquiryRow(row)).join('');
+
+  // 행 클릭 → 펼침
+  $$('#inquiryList .inq-row').forEach(el => {
+    el.onclick = async (e) => {
+      if (e.target.closest('.inq-detail-actions')) return;
+      const id = parseInt(el.dataset.id, 10);
+      inqExpandedId = (inqExpandedId === id) ? null : id;
+      // 펼침 시 미확인 상태였다면 자동으로 읽음 처리
+      const row = INQUIRIES_CACHE.find(r => r.id === id);
+      if (inqExpandedId === id && row && !row.is_read) {
+        await markInquiryRead(id, true, /*silent*/true);
+      } else {
+        renderInquiries();
+      }
+    };
+  });
+
+  // 액션 버튼
+  $$('#inquiryList [data-inq-action]').forEach(btn => {
+    btn.onclick = async (e) => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.id, 10);
+      const action = btn.dataset.inqAction;
+      if (action === 'toggle-read') {
+        const row = INQUIRIES_CACHE.find(r => r.id === id);
+        await markInquiryRead(id, !row.is_read);
+      } else if (action === 'delete') {
+        if (!confirm(`#${id} 문의를 삭제하시겠습니까? 되돌릴 수 없습니다.`)) return;
+        await deleteInquiry(id);
+      }
+    };
+  });
+}
+
+function renderInquiryRow(row) {
+  const expanded = (inqExpandedId === row.id);
+  const flag = row.is_read
+    ? `<span class="inq-flag read">읽음</span>`
+    : `<span class="inq-flag unread">새 글</span>`;
+  const detail = expanded ? `
+    <div class="inq-detail">
+      <div class="inq-meta">
+        등록 ${fmtDateTime(row.created_at)}
+        ${row.updated_at && row.updated_at !== row.created_at ? ` · 수정 ${fmtDateTime(row.updated_at)}` : ''}
+        ${row.contact ? ` · 연락처 <b style="color:var(--fg);">${esc(row.contact)}</b>` : ' · 연락처 없음'}
+      </div>
+      <div class="inq-body">${esc(row.body || '')}</div>
+      <div class="inq-detail-actions">
+        <button class="btn" data-inq-action="toggle-read" data-id="${row.id}">
+          ${row.is_read ? '미확인으로 표시' : '읽음으로 표시'}
+        </button>
+        ${row.contact ? `<a class="btn" href="mailto:${esc(row.contact)}?subject=${encodeURIComponent('[BOLD] 문의 #'+row.id+' 회신: '+(row.title||''))}" target="_blank">이메일로 회신</a>` : ''}
+        <div style="flex:1"></div>
+        <button class="btn btn-danger" data-inq-action="delete" data-id="${row.id}">삭제</button>
+      </div>
+    </div>
+  ` : '';
+  return `
+    <div class="inq-row ${row.is_read ? '' : 'unread'}" data-id="${row.id}">
+      <div class="inq-id">#${row.id}</div>
+      <div class="inq-title">
+        ${esc(row.title || '(제목 없음)')}${flag}
+        <small>${esc((row.body || '').replace(/\n/g,' ').slice(0, 90))}</small>
+      </div>
+      <div class="inq-contact">${row.contact ? esc(row.contact) : '<span style="color:#444;">—</span>'}</div>
+      <div class="inq-date">${fmtDateTime(row.created_at)}</div>
+      ${detail}
+    </div>
+  `;
+}
+
+async function markInquiryRead(id, isRead, silent=false) {
+  try {
+    const { error } = await supabase.rpc('mark_inquiry_read', {
+      p_admin_pw: ADMIN_PW, p_id: id, p_is_read: isRead
+    });
+    if (error) throw error;
+    const row = INQUIRIES_CACHE.find(r => r.id === id);
+    if (row) row.is_read = isRead;
+    if (!silent) toast(isRead ? '읽음 처리됨' : '미확인으로 표시됨');
+    renderInquiries();
+  } catch (err) {
+    toast('상태 변경 실패: ' + (err.message || err), 'err');
+  }
+}
+
+async function deleteInquiry(id) {
+  try {
+    const { error } = await supabase.rpc('delete_inquiry', {
+      p_admin_pw: ADMIN_PW, p_id: id
+    });
+    if (error) throw error;
+    INQUIRIES_CACHE = INQUIRIES_CACHE.filter(r => r.id !== id);
+    if (inqExpandedId === id) inqExpandedId = null;
+    toast('삭제 완료');
+    renderInquiries();
+  } catch (err) {
+    toast('삭제 실패: ' + (err.message || err), 'err');
+  }
+}
+
+$('#btnReloadInquiries').onclick = () => loadInquiries();
+
+// 사이드바 탭 클릭 시 자동 새로고침
+document.querySelector('.side-link[data-tab="inquiries"]')?.addEventListener('click', () => {
+  loadInquiries();
+});
 
 // ================== 시작 ==================
 (async () => {

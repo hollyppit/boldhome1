@@ -324,6 +324,7 @@
     border: 1.5px solid #fff;
     font-family: var(--display); letter-spacing:.25em; font-size:13px; text-transform:uppercase;
     transition: .25s;
+    background: transparent; color: inherit; cursor: pointer;
   }
   .btn-bold:hover { background:#fff; color:var(--fg); }
 
@@ -496,6 +497,83 @@
   .iem-toast.show { opacity:1; }
   .iem-toast.err { background:var(--accent); }
 
+  /* ===== 문의 모달 (비밀글) ===== */
+  .iq-backdrop {
+    position:fixed; inset:0; background:rgba(0,0,0,.6);
+    z-index: 320; display:none; align-items:center; justify-content:center;
+    padding: 20px;
+  }
+  .iq-backdrop.open { display:flex; }
+  .iq-panel {
+    background:#fff; color: var(--fg);
+    width: 100%; max-width: 580px; max-height: 92vh; overflow:auto;
+    border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,.45);
+    display:flex; flex-direction:column;
+  }
+  .iq-tabs {
+    display:flex; align-items:stretch; border-bottom:1px solid #e3e5eb;
+    position:sticky; top:0; background:#fff; z-index:1;
+  }
+  .iq-tab {
+    flex:1; padding: 16px 14px; background:transparent; border:0; cursor:pointer;
+    font-family:var(--display); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    color: var(--muted); font-weight:700; border-bottom:2px solid transparent;
+  }
+  .iq-tab.active { color:var(--fg); border-bottom-color:var(--accent); }
+  .iq-close {
+    width:46px; background:transparent; border:0; border-left:1px solid #e3e5eb;
+    color:var(--muted); font-size:18px; cursor:pointer;
+  }
+  .iq-close:hover { color:var(--fg); background:#f7f8fb; }
+  .iq-pane { padding: 18px 22px 4px; display:flex; flex-direction:column; gap:14px; }
+  .iq-pane.hidden { display:none; }
+  .iq-help {
+    margin:0; padding:10px 12px; background:#fff4e8; border:1px solid #ffd4b3;
+    color:#a14000; font-size:12px; line-height:1.65; border-radius:6px;
+  }
+  .iq-help b { color:#7a3000; }
+  .iq-field label {
+    display:block; font-family:var(--display); font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color: var(--muted); margin-bottom:6px; font-weight:700;
+  }
+  .iq-field input, .iq-field textarea {
+    width:100%; padding:10px 12px; background:#f7f8fb; border:1px solid #dfe2e9;
+    border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg);
+    box-sizing:border-box;
+  }
+  .iq-field input:focus, .iq-field textarea:focus { outline:0; border-color:var(--accent); background:#fff; }
+  .iq-field textarea { min-height:120px; resize:vertical; line-height:1.6; }
+  .iq-meta {
+    font-size:11px; color:var(--muted); padding:8px 12px;
+    background:#f7f8fb; border-radius:6px; line-height:1.6;
+  }
+  .iq-actions {
+    display:flex; gap:10px; padding: 6px 0 18px; align-items:center; flex-wrap:wrap;
+  }
+  .iq-btn {
+    padding: 10px 18px; border:1px solid var(--fg); background:#fff; color:var(--fg);
+    font-family:var(--display); font-size:12px; letter-spacing:.12em;
+    text-transform:uppercase; font-weight:700; border-radius:3px; cursor:pointer;
+  }
+  .iq-btn:hover { background:#f4f4f6; }
+  .iq-btn-primary { background:var(--fg); color:#fff; }
+  .iq-btn-primary:hover { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .iq-btn-danger { color:#a02020; border-color:#e09090; }
+  .iq-btn-danger:hover { background:#fdecec; }
+  .iq-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .iq-success {
+    padding:14px 16px; border-radius:6px;
+    background:#eaf6ec; border:1px solid #b5dfb9; color:#1d4a25;
+    font-size:13px; line-height:1.7;
+  }
+  .iq-success b { color:#0c2a12; }
+  .iq-success .iq-ref {
+    display:inline-block; margin-top:6px; padding:6px 10px; border-radius:4px;
+    background:#fff; border:1px dashed #1d4a25;
+    font-family:var(--display); font-size:14px; letter-spacing:.1em;
+  }
+  .iq-pane .hidden { display:none; }
+
   /* ===== 반응형 ===== */
   @media (max-width: 900px) {
     .nav { gap:20px; font-size:11px; flex-wrap:wrap; padding: 10px 14px 18px; }
@@ -538,6 +616,7 @@
 <!-- 상단 유틸 -->
 <div class="top-util">
   <a href="#" id="btnAdminToggle">관리자</a>
+  <a href="#" data-open-inquiry="lookup">내 문의 확인</a>
   <a href="#contact">CONTACT</a>
 </div>
 
@@ -632,6 +711,62 @@
   </div>
 </div>
 <div class="iem-toast" id="iemToast"></div>
+
+<!-- 문의 모달 (비밀글) -->
+<div class="iq-backdrop" id="iqBackdrop" role="dialog" aria-modal="true" aria-label="문의 남기기">
+  <div class="iq-panel">
+    <div class="iq-tabs">
+      <button class="iq-tab active" type="button" data-iq-tab="write">새 문의 작성</button>
+      <button class="iq-tab" type="button" data-iq-tab="lookup">내 문의 확인 / 수정</button>
+      <button class="iq-close" type="button" id="iqClose" aria-label="닫기">✕</button>
+    </div>
+
+    <!-- 작성 -->
+    <div class="iq-pane" data-iq-pane="write">
+      <p class="iq-help">
+        보내신 문의는 <b>비밀글</b>로 등록되어 관리자만 확인합니다.
+        등록 후 발급되는 <b>문의 번호</b>와 직접 설정하신 <b>비밀번호</b>로 본인 글을 다시 조회·수정·삭제하실 수 있습니다.
+      </p>
+      <div class="iq-field"><label>제목</label><input id="iqTitle" maxlength="120" placeholder="문의 제목" /></div>
+      <div class="iq-field"><label>내용</label><textarea id="iqBody" placeholder="문의 내용을 자유롭게 적어주세요."></textarea></div>
+      <div class="iq-field"><label>연락처 (이메일·전화 등, 선택)</label><input id="iqContact" maxlength="120" placeholder="회신 받으실 이메일 또는 전화" /></div>
+      <div class="iq-field"><label>수정용 비밀번호 (4자 이상)</label><input id="iqPw" type="password" minlength="4" placeholder="본인 글 확인·수정에 사용됩니다" /></div>
+      <div class="iq-actions">
+        <button class="iq-btn" type="button" id="iqCancelWrite">닫기</button>
+        <div style="flex:1"></div>
+        <button class="iq-btn iq-btn-primary" type="button" id="iqSubmit">등록</button>
+      </div>
+      <div class="iq-success hidden" id="iqSuccess"></div>
+    </div>
+
+    <!-- 조회/수정 -->
+    <div class="iq-pane hidden" data-iq-pane="lookup">
+      <div id="iqLookupForm">
+        <p class="iq-help">문의 번호와 본인이 설정한 비밀번호를 입력하세요.</p>
+        <div class="iq-field"><label>문의 번호</label><input id="iqLkId" type="number" min="1" placeholder="등록 시 발급받은 번호" /></div>
+        <div class="iq-field"><label>비밀번호</label><input id="iqLkPw" type="password" /></div>
+        <div class="iq-actions">
+          <button class="iq-btn" type="button" id="iqCancelLookup">닫기</button>
+          <div style="flex:1"></div>
+          <button class="iq-btn iq-btn-primary" type="button" id="iqLookupBtn">조회</button>
+        </div>
+      </div>
+
+      <div id="iqEditForm" class="hidden">
+        <div class="iq-field"><label>제목</label><input id="iqEdTitle" /></div>
+        <div class="iq-field"><label>내용</label><textarea id="iqEdBody"></textarea></div>
+        <div class="iq-field"><label>연락처</label><input id="iqEdContact" /></div>
+        <div class="iq-meta" id="iqEdMeta"></div>
+        <div class="iq-actions">
+          <button class="iq-btn iq-btn-danger" type="button" id="iqEdDelete">삭제</button>
+          <div style="flex:1"></div>
+          <button class="iq-btn" type="button" id="iqEdBack">뒤로</button>
+          <button class="iq-btn iq-btn-primary" type="button" id="iqEdSave">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="module">
   // ================== Supabase 설정 ==================
@@ -745,7 +880,7 @@
       { id:'s5', slug:'contact', type:'cta', sort_order:5,
         title:'CONTACT', subtitle:'함께 만들어요',
         body:'새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
-        link_label:'이메일 보내기', link_url:'mailto:hello@bold.kr',
+        link_label:'문의 남기기', link_url:'#inquiry',
         items:[] },
     ];
   }
@@ -899,7 +1034,11 @@
           <div class="gallery-grid">${cards || `<div class="empty-note" style="grid-column:1/-1;">항목이 없습니다.</div>`}</div>
         </section>`;
 
-      case 'cta':
+      case 'cta': {
+        const isContact = (s.slug || '').toLowerCase() === 'contact';
+        const ctaButton = isContact
+          ? `<button class="btn-bold reveal" type="button" data-open-inquiry="1">${escape(s.link_label||'문의 남기기')}</button>`
+          : (s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(s.link_label||'GET IN TOUCH')}</a>` : '');
         return `
         <section ${anchor} class="cta">
           ${editHint}
@@ -908,8 +1047,9 @@
             <h2 class="block-title">${escape(s.title||'')}</h2>
           </div>
           <p class="cta-text reveal">${nl2br(escape(s.body||''))}</p>
-          ${s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(s.link_label||'GET IN TOUCH')}</a>`:''}
+          ${ctaButton}
         </section>`;
+      }
 
       default:
         return `
@@ -995,6 +1135,7 @@
     initReveal();
     initSlideshows(SECTIONS_CACHE);
     initAdminMode();
+    initInquiryModal();
   } catch (e) {
     console.error(e);
     $('#main').innerHTML = `<div class="empty-note">데이터 로딩 실패. Supabase 설정을 확인해 주세요.</div>`;
@@ -1254,7 +1395,7 @@
       await supabase.from('sections').insert({
         slug:'contact', type:'cta', title:'CONTACT', subtitle:'함께 만들어요',
         body:'새로운 협업 제안이나 문의를 환영합니다. 편하게 연락 주세요.',
-        link_label:'이메일 보내기', link_url:'mailto:hello@bold.kr',
+        link_label:'문의 남기기', link_url:'#inquiry',
         sort_order:5
       });
       iemToast('설치 완료 · 관리자 모드로 전환됩니다');
@@ -1262,6 +1403,183 @@
     } catch (err) {
       iemToast('설치 실패: ' + (err.message||err), 'err');
     }
+  }
+
+  // ================== 문의 모달 (비밀글) ==================
+  function initInquiryModal() {
+    const backdrop = $('#iqBackdrop');
+    if (!backdrop) return;
+    const panes = {
+      write: backdrop.querySelector('[data-iq-pane="write"]'),
+      lookup: backdrop.querySelector('[data-iq-pane="lookup"]'),
+    };
+    const tabs = backdrop.querySelectorAll('.iq-tab');
+
+    function openIq(tab='write') { backdrop.classList.add('open'); switchTab(tab); }
+    function closeIq() {
+      backdrop.classList.remove('open');
+      resetWriteForm();
+      resetLookupForm();
+    }
+    function switchTab(name) {
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.iqTab === name));
+      Object.entries(panes).forEach(([k, el]) => el.classList.toggle('hidden', k !== name));
+    }
+    function resetWriteForm() {
+      ['#iqTitle','#iqBody','#iqContact','#iqPw'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+      const ok = $('#iqSuccess'); ok.classList.add('hidden'); ok.innerHTML = '';
+    }
+    function resetLookupForm() {
+      ['#iqLkId','#iqLkPw','#iqEdTitle','#iqEdBody','#iqEdContact'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+      $('#iqLookupForm').classList.remove('hidden');
+      $('#iqEditForm').classList.add('hidden');
+      $('#iqEdMeta').textContent = '';
+      $('#iqEditForm').dataset.id = '';
+      $('#iqEditForm').dataset.pw = '';
+    }
+
+    // 컨택트 섹션 버튼 + 푸터 ADMIN 옆에 둔 것 등에서 호출
+    document.body.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-open-inquiry]');
+      if (trigger) {
+        e.preventDefault();
+        const tab = trigger.dataset.openInquiry === 'lookup' ? 'lookup' : 'write';
+        openIq(tab);
+      }
+    });
+    tabs.forEach(t => t.onclick = () => switchTab(t.dataset.iqTab));
+    $('#iqClose').onclick = closeIq;
+    $('#iqCancelWrite').onclick = closeIq;
+    $('#iqCancelLookup').onclick = closeIq;
+    backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeIq(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && backdrop.classList.contains('open')) closeIq();
+    });
+
+    // ── 작성: 등록
+    $('#iqSubmit').onclick = async () => {
+      if (!useSupabase) return iemToast('Supabase 미설정', 'err');
+      const title   = $('#iqTitle').value.trim();
+      const body    = $('#iqBody').value.trim();
+      const contact = $('#iqContact').value.trim();
+      const pw      = $('#iqPw').value;
+      if (!title)        return iemToast('제목을 입력해 주세요', 'err');
+      if (!body)         return iemToast('내용을 입력해 주세요', 'err');
+      if (!pw || pw.length < 4) return iemToast('비밀번호는 4자 이상', 'err');
+      const btn = $('#iqSubmit'); btn.disabled = true;
+      try {
+        const { data, error } = await supabase.rpc('submit_inquiry', {
+          p_title: title, p_body: body, p_contact: contact || null, p_edit_pw: pw
+        });
+        if (error) throw error;
+        const newId = data;
+        $('#iqSuccess').innerHTML =
+          `<div><b>등록 완료!</b> 아래 문의 번호와 본인이 입력한 비밀번호를 꼭 기억해 주세요.</div>
+           <div>본인 글 조회·수정·삭제는 상단 탭의 "내 문의 확인 / 수정"에서 가능합니다.</div>
+           <div class="iq-ref">문의 번호 #${newId}</div>`;
+        $('#iqSuccess').classList.remove('hidden');
+        ['#iqTitle','#iqBody','#iqContact','#iqPw'].forEach(id => $(id).value = '');
+      } catch (err) {
+        iemToast('등록 실패: ' + (err.message || err), 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    // ── 조회
+    $('#iqLookupBtn').onclick = async () => {
+      if (!useSupabase) return iemToast('Supabase 미설정', 'err');
+      const id = parseInt($('#iqLkId').value, 10);
+      const pw = $('#iqLkPw').value;
+      if (!id || id < 1) return iemToast('문의 번호를 입력해 주세요', 'err');
+      if (!pw)           return iemToast('비밀번호를 입력해 주세요', 'err');
+      const btn = $('#iqLookupBtn'); btn.disabled = true;
+      try {
+        const { data, error } = await supabase.rpc('verify_inquiry', { p_id: id, p_edit_pw: pw });
+        if (error) throw error;
+        if (!data || data.length === 0) {
+          return iemToast('문의 번호 또는 비밀번호가 일치하지 않습니다', 'err');
+        }
+        const row = data[0];
+        $('#iqEdTitle').value   = row.title || '';
+        $('#iqEdBody').value    = row.body || '';
+        $('#iqEdContact').value = row.contact || '';
+        $('#iqEdMeta').textContent =
+          `등록 ${formatDate(row.created_at)}` +
+          (row.updated_at && row.updated_at !== row.created_at ? ` · 수정 ${formatDate(row.updated_at)}` : '') +
+          ` · ${row.is_read ? '관리자 확인됨' : '관리자 미확인'}`;
+        $('#iqEditForm').dataset.id = String(row.id);
+        $('#iqEditForm').dataset.pw = pw;
+        $('#iqLookupForm').classList.add('hidden');
+        $('#iqEditForm').classList.remove('hidden');
+      } catch (err) {
+        iemToast('조회 실패: ' + (err.message || err), 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    // ── 본인 수정 저장
+    $('#iqEdSave').onclick = async () => {
+      const id = parseInt($('#iqEditForm').dataset.id, 10);
+      const pw = $('#iqEditForm').dataset.pw;
+      if (!id || !pw) return;
+      const title   = $('#iqEdTitle').value.trim();
+      const body    = $('#iqEdBody').value.trim();
+      const contact = $('#iqEdContact').value.trim();
+      if (!title || !body) return iemToast('제목·내용 모두 입력해 주세요', 'err');
+      const btn = $('#iqEdSave'); btn.disabled = true;
+      try {
+        const { data, error } = await supabase.rpc('update_inquiry_by_user', {
+          p_id: id, p_edit_pw: pw,
+          p_title: title, p_body: body, p_contact: contact || null
+        });
+        if (error) throw error;
+        if (!data) return iemToast('수정 권한 없음 (비밀번호 불일치)', 'err');
+        iemToast('수정 완료');
+      } catch (err) {
+        iemToast('수정 실패: ' + (err.message || err), 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    // ── 본인 삭제
+    $('#iqEdDelete').onclick = async () => {
+      const id = parseInt($('#iqEditForm').dataset.id, 10);
+      const pw = $('#iqEditForm').dataset.pw;
+      if (!id || !pw) return;
+      if (!confirm('정말 삭제하시겠습니까? 되돌릴 수 없습니다.')) return;
+      const btn = $('#iqEdDelete'); btn.disabled = true;
+      try {
+        const { data, error } = await supabase.rpc('delete_inquiry_by_user', {
+          p_id: id, p_edit_pw: pw
+        });
+        if (error) throw error;
+        if (!data) return iemToast('삭제 권한 없음', 'err');
+        iemToast('삭제 완료');
+        resetLookupForm();
+      } catch (err) {
+        iemToast('삭제 실패: ' + (err.message || err), 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    // ── 뒤로 (조회 화면으로)
+    $('#iqEdBack').onclick = () => {
+      $('#iqLookupForm').classList.remove('hidden');
+      $('#iqEditForm').classList.add('hidden');
+    };
+  }
+
+  function formatDate(s) {
+    if (!s) return '';
+    try {
+      const d = new Date(s);
+      const pad = n => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch { return s; }
   }
 </script>
 </body>
