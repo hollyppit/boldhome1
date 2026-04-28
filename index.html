@@ -247,7 +247,9 @@
     margin:0; text-transform: uppercase;
   }
   .block-subtitle {
-    font-family: var(--serif); font-size:14px; color:var(--muted);
+    font-family: var(--subtitle-font, var(--serif));
+    font-size: calc(14px * var(--subtitle-scale, 1));
+    color:var(--muted);
     margin-left:auto;
   }
 
@@ -1244,6 +1246,8 @@
     const parts = [];
     if (ex.title_font && FONT_FAMILY_MAP[ex.title_font]) parts.push(`--title-font:${FONT_FAMILY_MAP[ex.title_font]}`);
     if (ex.title_scale && Number(ex.title_scale) > 0)    parts.push(`--title-scale:${Number(ex.title_scale)}`);
+    if (ex.subtitle_font && FONT_FAMILY_MAP[ex.subtitle_font]) parts.push(`--subtitle-font:${FONT_FAMILY_MAP[ex.subtitle_font]}`);
+    if (ex.subtitle_scale && Number(ex.subtitle_scale) > 0)    parts.push(`--subtitle-scale:${Number(ex.subtitle_scale)}`);
     if (ex.body_font && FONT_FAMILY_MAP[ex.body_font])   parts.push(`--body-font:${FONT_FAMILY_MAP[ex.body_font]}`);
     if (ex.body_scale && Number(ex.body_scale) > 0)      parts.push(`--body-scale:${Number(ex.body_scale)}`);
     return parts.join(';');
@@ -1267,6 +1271,17 @@
     return `<select id="${id}" style="width:100%; padding:10px 12px; background:#f7f8fb; border:1px solid #dfe2e9; border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg); box-sizing:border-box;">
       ${TYPO_SCALES.map(o => `<option value="${o.value}"${cur===o.value ? ' selected':''}>${o.label}</option>`).join('')}
     </select>`;
+  }
+  // 숫자 입력 기반 크기 조정 (저장은 배수, 표시는 %)
+  function renderScaleInput(id, current) {
+    const num = Number(current);
+    const pct = (num > 0) ? Math.round(num * 100) : '';
+    return `<div style="position:relative;">
+      <input type="number" id="${id}" min="50" max="300" step="1" placeholder="100"
+        value="${pct}"
+        style="width:100%; padding:10px 30px 10px 12px; background:#f7f8fb; border:1px solid #dfe2e9; border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg); box-sizing:border-box;">
+      <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:12px; pointer-events:none;">%</span>
+    </div>`;
   }
 
   function renderSection(s, idx, isSample) {
@@ -1730,15 +1745,26 @@
         </div>
       </div>
       <div style="border-top:1px dashed #dfe2e9; padding-top:14px; margin-top:4px;">
-        <div style="font-family:var(--display); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:10px;">타이포그래피 (이 섹션만 적용)</div>
+        <div style="font-family:var(--display); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:4px;">타이포그래피 (이 섹션만 적용)</div>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.5;">크기는 50~300% 사이 숫자를 직접 입력하세요. 비우면 사이트 기본값을 사용합니다.</div>
         <div class="iem-grid-2">
           <div class="iem-field">
             <label>제목 폰트</label>
             ${renderFontSelect('iem_title_font', s.extra?.title_font)}
           </div>
           <div class="iem-field">
-            <label>제목 크기</label>
-            ${renderScaleSelect('iem_title_scale', s.extra?.title_scale)}
+            <label>제목 크기 (%)</label>
+            ${renderScaleInput('iem_title_scale', s.extra?.title_scale)}
+          </div>
+        </div>
+        <div class="iem-grid-2">
+          <div class="iem-field">
+            <label>부제 폰트</label>
+            ${renderFontSelect('iem_subtitle_font', s.extra?.subtitle_font)}
+          </div>
+          <div class="iem-field">
+            <label>부제 크기 (%)</label>
+            ${renderScaleInput('iem_subtitle_scale', s.extra?.subtitle_scale)}
           </div>
         </div>
         <div class="iem-grid-2">
@@ -1747,8 +1773,8 @@
             ${renderFontSelect('iem_body_font', s.extra?.body_font)}
           </div>
           <div class="iem-field">
-            <label>본문 크기</label>
-            ${renderScaleSelect('iem_body_scale', s.extra?.body_scale)}
+            <label>본문 크기 (%)</label>
+            ${renderScaleInput('iem_body_scale', s.extra?.body_scale)}
           </div>
         </div>
       </div>
@@ -1818,17 +1844,28 @@
       payload.link_label_en = $('#iem_link_label_en')?.value || null;
     }
     // extra jsonb 머지 (타이포그래피 + 비디오)
-    const titleFont  = $('#iem_title_font')?.value || '';
-    const titleScale = $('#iem_title_scale')?.value || '';
-    const bodyFont   = $('#iem_body_font')?.value || '';
-    const bodyScale  = $('#iem_body_scale')?.value || '';
-    const videoUrl   = ($('#iem_video_url')?.value || '').trim();
+    // 크기 입력은 % 숫자 → 배수로 변환 (예: 115 → 1.15). 50~300 범위로 제한.
+    const pctToScale = (raw) => {
+      const n = Number(raw);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      const clamped = Math.min(300, Math.max(50, n));
+      return Math.round(clamped) / 100;
+    };
+    const titleFont     = $('#iem_title_font')?.value || '';
+    const titleScale    = pctToScale($('#iem_title_scale')?.value);
+    const subtitleFont  = $('#iem_subtitle_font')?.value || '';
+    const subtitleScale = pctToScale($('#iem_subtitle_scale')?.value);
+    const bodyFont      = $('#iem_body_font')?.value || '';
+    const bodyScale     = pctToScale($('#iem_body_scale')?.value);
+    const videoUrl      = ($('#iem_video_url')?.value || '').trim();
     const nextExtra = { ...(s.extra || {}) };
-    if (titleFont)  nextExtra.title_font = titleFont;  else delete nextExtra.title_font;
-    if (titleScale) nextExtra.title_scale = Number(titleScale); else delete nextExtra.title_scale;
-    if (bodyFont)   nextExtra.body_font = bodyFont;   else delete nextExtra.body_font;
-    if (bodyScale)  nextExtra.body_scale = Number(bodyScale);  else delete nextExtra.body_scale;
-    if (videoUrl)   nextExtra.video_url = videoUrl;   else delete nextExtra.video_url;
+    if (titleFont)     nextExtra.title_font = titleFont;       else delete nextExtra.title_font;
+    if (titleScale)    nextExtra.title_scale = titleScale;     else delete nextExtra.title_scale;
+    if (subtitleFont)  nextExtra.subtitle_font = subtitleFont; else delete nextExtra.subtitle_font;
+    if (subtitleScale) nextExtra.subtitle_scale = subtitleScale; else delete nextExtra.subtitle_scale;
+    if (bodyFont)      nextExtra.body_font = bodyFont;         else delete nextExtra.body_font;
+    if (bodyScale)     nextExtra.body_scale = bodyScale;       else delete nextExtra.body_scale;
+    if (videoUrl)      nextExtra.video_url = videoUrl;         else delete nextExtra.video_url;
     payload.extra = nextExtra;
     try {
       const { error } = await supabase.from('sections').update(payload).eq('id', s.id);

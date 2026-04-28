@@ -450,27 +450,30 @@
 
     <!-- 타이포그래피 (이 섹션만 적용) -->
     <div style="border-top:1px dashed var(--line); padding-top:14px; margin-top:18px;">
-      <h3 style="margin:0 0 12px; font-family:var(--mono); font-weight:700; letter-spacing:.08em; font-size:13px; text-transform:uppercase; color:var(--muted);">
+      <h3 style="margin:0 0 6px; font-family:var(--mono); font-weight:700; letter-spacing:.08em; font-size:13px; text-transform:uppercase; color:var(--muted);">
         타이포그래피 <small style="color:#666; font-weight:400; letter-spacing:0; text-transform:none;">— 이 섹션에만 적용 (비워두면 사이트 기본 사용)</small>
       </h3>
+      <p style="font-size:11px; color:var(--muted); margin:0 0 12px; line-height:1.7;">
+        크기는 50~300% 사이 숫자를 직접 입력하세요. 비우면 사이트 기본값을 사용합니다.
+      </p>
       <div class="grid-2">
         <div>
           <label>제목 폰트</label>
           <select id="sec_title_font" class="font-pick"></select>
         </div>
         <div>
-          <label>제목 크기</label>
-          <select id="sec_title_scale">
-            <option value="">기본 (100%)</option>
-            <option value="0.75">작게 (75%)</option>
-            <option value="0.9">약간 작게 (90%)</option>
-            <option value="1">보통 (100%)</option>
-            <option value="1.15">약간 크게 (115%)</option>
-            <option value="1.3">크게 (130%)</option>
-            <option value="1.5">더 크게 (150%)</option>
-            <option value="1.75">강조 (175%)</option>
-            <option value="2">최대 (200%)</option>
-          </select>
+          <label>제목 크기 (%)</label>
+          <input type="number" id="sec_title_scale" min="50" max="300" step="1" placeholder="100" />
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:6px;">
+        <div>
+          <label>부제 폰트</label>
+          <select id="sec_subtitle_font" class="font-pick"></select>
+        </div>
+        <div>
+          <label>부제 크기 (%)</label>
+          <input type="number" id="sec_subtitle_scale" min="50" max="300" step="1" placeholder="100" />
         </div>
       </div>
       <div class="grid-2" style="margin-top:6px;">
@@ -479,18 +482,8 @@
           <select id="sec_body_font" class="font-pick"></select>
         </div>
         <div>
-          <label>본문 크기</label>
-          <select id="sec_body_scale">
-            <option value="">기본 (100%)</option>
-            <option value="0.75">작게 (75%)</option>
-            <option value="0.9">약간 작게 (90%)</option>
-            <option value="1">보통 (100%)</option>
-            <option value="1.15">약간 크게 (115%)</option>
-            <option value="1.3">크게 (130%)</option>
-            <option value="1.5">더 크게 (150%)</option>
-            <option value="1.75">강조 (175%)</option>
-            <option value="2">최대 (200%)</option>
-          </select>
+          <label>본문 크기 (%)</label>
+          <input type="number" id="sec_body_scale" min="50" max="300" step="1" placeholder="100" />
         </div>
       </div>
     </div>
@@ -965,11 +958,17 @@ async function openSectionModal(id) {
     $('#sec_body_en').value       = s.body_en       || '';
     $('#sec_link_label_en').value = s.link_label_en || '';
     const ex = s.extra || {};
-    $('#sec_title_font').value  = ex.title_font  || '';
-    $('#sec_title_scale').value = ex.title_scale != null ? String(ex.title_scale) : '';
-    $('#sec_body_font').value   = ex.body_font   || '';
-    $('#sec_body_scale').value  = ex.body_scale  != null ? String(ex.body_scale)  : '';
-    $('#sec_video_url').value   = ex.video_url   || '';
+    const scaleToPct = (v) => {
+      const n = Number(v);
+      return (Number.isFinite(n) && n > 0) ? String(Math.round(n * 100)) : '';
+    };
+    $('#sec_title_font').value     = ex.title_font     || '';
+    $('#sec_title_scale').value    = scaleToPct(ex.title_scale);
+    $('#sec_subtitle_font').value  = ex.subtitle_font  || '';
+    $('#sec_subtitle_scale').value = scaleToPct(ex.subtitle_scale);
+    $('#sec_body_font').value      = ex.body_font      || '';
+    $('#sec_body_scale').value     = scaleToPct(ex.body_scale);
+    $('#sec_video_url').value      = ex.video_url      || '';
     $('#btnDeleteSection').classList.remove('hidden');
     refreshImagePreview('#sec_image_url', '#sec_image_preview');
     await loadItems(id);
@@ -980,7 +979,7 @@ async function openSectionModal(id) {
      'title_en','subtitle_en','body_en','link_label_en'].forEach(k => $(`#sec_${k}`).value = '');
     $('#sec_type').value = 'text';
     $('#sec_is_visible').value = 'true';
-    ['title_font','title_scale','body_font','body_scale'].forEach(k => $(`#sec_${k}`).value = '');
+    ['title_font','title_scale','subtitle_font','subtitle_scale','body_font','body_scale'].forEach(k => $(`#sec_${k}`).value = '');
     $('#btnDeleteSection').classList.add('hidden');
     refreshImagePreview('#sec_image_url', '#sec_image_preview');
     $('#itemsEditor').classList.add('hidden');
@@ -1051,16 +1050,27 @@ $('#item_image_file').onchange = e => handleImageUpload(e.target, '#item_image_u
 $('#btnSaveSection').onclick = async () => {
   // 타이포그래피·비디오는 기존 extra와 머지 (다른 키를 보존)
   const baseExtra = (editingSection && editingSection.extra) ? { ...editingSection.extra } : {};
-  const tFont  = $('#sec_title_font').value;
-  const tScale = $('#sec_title_scale').value;
-  const bFont  = $('#sec_body_font').value;
-  const bScale = $('#sec_body_scale').value;
-  const vUrl   = ($('#sec_video_url').value || '').trim();
-  if (tFont)  baseExtra.title_font = tFont;   else delete baseExtra.title_font;
-  if (tScale) baseExtra.title_scale = Number(tScale); else delete baseExtra.title_scale;
-  if (bFont)  baseExtra.body_font = bFont;    else delete baseExtra.body_font;
-  if (bScale) baseExtra.body_scale = Number(bScale);  else delete baseExtra.body_scale;
-  if (vUrl)   baseExtra.video_url = vUrl;     else delete baseExtra.video_url;
+  // 크기 입력은 % 숫자 → 배수로 변환 (예: 115 → 1.15). 50~300 범위로 제한.
+  const pctToScale = (raw) => {
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n <= 0) return null;
+    const clamped = Math.min(300, Math.max(50, n));
+    return Math.round(clamped) / 100;
+  };
+  const tFont   = $('#sec_title_font').value;
+  const tScale  = pctToScale($('#sec_title_scale').value);
+  const stFont  = $('#sec_subtitle_font').value;
+  const stScale = pctToScale($('#sec_subtitle_scale').value);
+  const bFont   = $('#sec_body_font').value;
+  const bScale  = pctToScale($('#sec_body_scale').value);
+  const vUrl    = ($('#sec_video_url').value || '').trim();
+  if (tFont)   baseExtra.title_font = tFont;        else delete baseExtra.title_font;
+  if (tScale)  baseExtra.title_scale = tScale;      else delete baseExtra.title_scale;
+  if (stFont)  baseExtra.subtitle_font = stFont;    else delete baseExtra.subtitle_font;
+  if (stScale) baseExtra.subtitle_scale = stScale;  else delete baseExtra.subtitle_scale;
+  if (bFont)   baseExtra.body_font = bFont;         else delete baseExtra.body_font;
+  if (bScale)  baseExtra.body_scale = bScale;       else delete baseExtra.body_scale;
+  if (vUrl)    baseExtra.video_url = vUrl;          else delete baseExtra.video_url;
   const payload = {
     slug: ($('#sec_slug').value || '').trim() || 'section-'+Date.now(),
     type: $('#sec_type').value,
