@@ -136,20 +136,27 @@
     letter-spacing: -.02em;
     margin:0;
     text-transform: uppercase;
+    color: var(--title-color, inherit);
   }
-  .hero-title em {
+  .hero-subtitle {
+    display:block;
+    font-family: var(--subtitle-font, var(--serif));
     font-style: italic;
-    font-family: var(--serif);
     font-weight: 900;
-    color: var(--accent);
+    font-size: calc(clamp(60px, 12vw, 200px) * var(--subtitle-scale, var(--title-scale, 1)));
+    line-height: .88;
+    letter-spacing: -.02em;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--subtitle-color, var(--accent));
   }
   .hero-sub {
     font-family: var(--body-font, var(--serif));
     font-size: calc(clamp(15px, 1.3vw, 19px) * var(--body-scale, 1));
     line-height: 1.7;
     max-width: 420px;
-    margin: 0 0 18px;
-    color: #1a1a1a;
+    margin: 18px 0 18px;
+    color: var(--body-color, #1a1a1a);
   }
   .hero-sub small { display:block; font-family:var(--display); font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
   .hero-visual {
@@ -245,11 +252,12 @@
     font-size: calc(clamp(36px, 6vw, 84px) * var(--title-scale, 1));
     letter-spacing:-.01em;
     margin:0; text-transform: uppercase;
+    color: var(--title-color, inherit);
   }
   .block-subtitle {
     font-family: var(--subtitle-font, var(--serif));
     font-size: calc(14px * var(--subtitle-scale, 1));
-    color:var(--muted);
+    color: var(--subtitle-color, var(--muted));
     margin-left:auto;
   }
 
@@ -260,6 +268,7 @@
     line-height: 1.8;
     max-width: 780px;
     margin: 0 auto;
+    color: var(--body-color, inherit);
   }
   .text-body p + p { margin-top: 1.2em; }
 
@@ -273,11 +282,12 @@
     font-family: var(--title-font, var(--display));
     font-size: calc(clamp(28px,3vw,44px) * var(--title-scale, 1));
     margin:0 0 16px; font-weight:900; letter-spacing:-.01em;
+    color: var(--title-color, inherit);
   }
   .image-text .text p {
     font-family: var(--body-font, var(--serif)); line-height:1.8;
     font-size: calc(16px * var(--body-scale, 1));
-    color:#222;
+    color: var(--body-color, #222);
   }
 
   /* 갤러리 (쇼핑몰 상품 그리드 스타일) */
@@ -1241,6 +1251,12 @@
     </div>`;
   }
 
+  // hex 색상만 허용 (#RGB, #RRGGBB, #RRGGBBAA) — 인라인 스타일 주입 방지
+  function safeHexColor(c) {
+    if (typeof c !== 'string') return null;
+    const v = c.trim();
+    return /^#[0-9a-fA-F]{3,8}$/.test(v) ? v : null;
+  }
   function buildTypoStyle(extra) {
     const ex = extra || {};
     const parts = [];
@@ -1250,6 +1266,12 @@
     if (ex.subtitle_scale && Number(ex.subtitle_scale) > 0)    parts.push(`--subtitle-scale:${Number(ex.subtitle_scale)}`);
     if (ex.body_font && FONT_FAMILY_MAP[ex.body_font])   parts.push(`--body-font:${FONT_FAMILY_MAP[ex.body_font]}`);
     if (ex.body_scale && Number(ex.body_scale) > 0)      parts.push(`--body-scale:${Number(ex.body_scale)}`);
+    const tc = safeHexColor(ex.title_color);
+    const sc = safeHexColor(ex.subtitle_color);
+    const bc = safeHexColor(ex.body_color);
+    if (tc) parts.push(`--title-color:${tc}`);
+    if (sc) parts.push(`--subtitle-color:${sc}`);
+    if (bc) parts.push(`--body-color:${bc}`);
     return parts.join(';');
   }
 
@@ -1281,6 +1303,22 @@
         value="${pct}"
         style="width:100%; padding:10px 30px 10px 12px; background:#f7f8fb; border:1px solid #dfe2e9; border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg); box-sizing:border-box;">
       <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:12px; pointer-events:none;">%</span>
+    </div>`;
+  }
+  // 색상 입력 (color picker + hex 텍스트 + 비우기 버튼)
+  function renderColorInput(id, current) {
+    const cur = (typeof current === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(current.trim())) ? current.trim() : '';
+    const swatch = cur || '#111111';
+    return `<div style="display:flex; gap:6px; align-items:stretch;">
+      <input type="color" value="${swatch}"
+        oninput="document.getElementById('${id}').value=this.value;"
+        style="width:42px; height:38px; padding:0; border:1px solid #dfe2e9; border-radius:6px; background:#f7f8fb; cursor:pointer; flex:0 0 42px;">
+      <input type="text" id="${id}" value="${cur}" placeholder="비우면 기본"
+        oninput="if(/^#[0-9a-fA-F]{3,8}$/.test(this.value)) this.previousElementSibling.value=this.value;"
+        style="flex:1; min-width:0; padding:10px 12px; background:#f7f8fb; border:1px solid #dfe2e9; border-radius:6px; font-family:inherit; font-size:14px; color:var(--fg); box-sizing:border-box;">
+      <button type="button" title="기본값"
+        onclick="const tx=document.getElementById('${id}'); tx.value=''; tx.parentElement.querySelector('input[type=color]').value='#111111';"
+        style="padding:0 10px; background:#f7f8fb; border:1px solid #dfe2e9; border-radius:6px; color:var(--muted); cursor:pointer; font-size:13px;">✕</button>
     </div>`;
   }
 
@@ -1353,7 +1391,8 @@
         <section ${anchor} class="hero"${heroStyle ? ` style="${heroStyle}"` : ''}>
           ${editHint}
           <div>
-            <h1 class="hero-title reveal">${escape(sTitle||'')}${sSubtitle ? `<br><em>${escape(sSubtitle)}</em>` : ''}</h1>
+            <h1 class="hero-title reveal">${escape(sTitle||'')}</h1>
+            ${sSubtitle ? `<div class="hero-subtitle reveal">${escape(sSubtitle)}</div>` : ''}
             <p class="hero-sub reveal"><small>${escape(t('intro'))}</small>${nl2br(escape(sBody||''))}</p>
             ${s.link_url ? `<a class="btn-bold reveal" style="border-color:var(--fg); color:var(--fg);" href="${s.link_url}">${escape(sLinkLbl||t('learn_more'))}</a>`: ''}
           </div>
@@ -1757,6 +1796,10 @@
             ${renderScaleInput('iem_title_scale', s.extra?.title_scale)}
           </div>
         </div>
+        <div class="iem-field">
+          <label>제목 색상</label>
+          ${renderColorInput('iem_title_color', s.extra?.title_color)}
+        </div>
         <div class="iem-grid-2">
           <div class="iem-field">
             <label>부제 폰트</label>
@@ -1767,6 +1810,10 @@
             ${renderScaleInput('iem_subtitle_scale', s.extra?.subtitle_scale)}
           </div>
         </div>
+        <div class="iem-field">
+          <label>부제 색상</label>
+          ${renderColorInput('iem_subtitle_color', s.extra?.subtitle_color)}
+        </div>
         <div class="iem-grid-2">
           <div class="iem-field">
             <label>본문 폰트</label>
@@ -1776,6 +1823,10 @@
             <label>본문 크기 (%)</label>
             ${renderScaleInput('iem_body_scale', s.extra?.body_scale)}
           </div>
+        </div>
+        <div class="iem-field">
+          <label>본문 색상</label>
+          ${renderColorInput('iem_body_color', s.extra?.body_color)}
         </div>
       </div>
     `;
@@ -1851,20 +1902,30 @@
       const clamped = Math.min(300, Math.max(50, n));
       return Math.round(clamped) / 100;
     };
+    const validHex = (raw) => {
+      const v = String(raw || '').trim();
+      return /^#[0-9a-fA-F]{3,8}$/.test(v) ? v : '';
+    };
     const titleFont     = $('#iem_title_font')?.value || '';
     const titleScale    = pctToScale($('#iem_title_scale')?.value);
+    const titleColor    = validHex($('#iem_title_color')?.value);
     const subtitleFont  = $('#iem_subtitle_font')?.value || '';
     const subtitleScale = pctToScale($('#iem_subtitle_scale')?.value);
+    const subtitleColor = validHex($('#iem_subtitle_color')?.value);
     const bodyFont      = $('#iem_body_font')?.value || '';
     const bodyScale     = pctToScale($('#iem_body_scale')?.value);
+    const bodyColor     = validHex($('#iem_body_color')?.value);
     const videoUrl      = ($('#iem_video_url')?.value || '').trim();
     const nextExtra = { ...(s.extra || {}) };
     if (titleFont)     nextExtra.title_font = titleFont;       else delete nextExtra.title_font;
     if (titleScale)    nextExtra.title_scale = titleScale;     else delete nextExtra.title_scale;
+    if (titleColor)    nextExtra.title_color = titleColor;     else delete nextExtra.title_color;
     if (subtitleFont)  nextExtra.subtitle_font = subtitleFont; else delete nextExtra.subtitle_font;
     if (subtitleScale) nextExtra.subtitle_scale = subtitleScale; else delete nextExtra.subtitle_scale;
+    if (subtitleColor) nextExtra.subtitle_color = subtitleColor; else delete nextExtra.subtitle_color;
     if (bodyFont)      nextExtra.body_font = bodyFont;         else delete nextExtra.body_font;
     if (bodyScale)     nextExtra.body_scale = bodyScale;       else delete nextExtra.body_scale;
+    if (bodyColor)     nextExtra.body_color = bodyColor;       else delete nextExtra.body_color;
     if (videoUrl)      nextExtra.video_url = videoUrl;         else delete nextExtra.video_url;
     payload.extra = nextExtra;
     try {

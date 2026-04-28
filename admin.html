@@ -21,6 +21,18 @@
   }
   input:focus, textarea:focus, select:focus { outline:0; border-color:#555; }
   textarea { min-height: 88px; resize: vertical; line-height:1.5; }
+
+  .color-row { display:flex; gap:6px; align-items:stretch; }
+  .color-row input[type="color"] {
+    width:46px; flex:0 0 46px; padding:0; height:38px;
+    background:var(--panel2); border:1px solid var(--line); border-radius:6px; cursor:pointer;
+  }
+  .color-row input[type="text"] { flex:1; min-width:0; }
+  .color-row button {
+    padding:0 12px; background:var(--panel2); color:var(--muted);
+    border:1px solid var(--line); border-radius:6px; font-size:13px;
+  }
+  .color-row button:hover { color:var(--fg); border-color:#555; }
   label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin: 10px 0 6px; font-family:var(--mono); font-weight:600; }
   .btn {
     padding: 9px 16px; border:1px solid var(--line); background:var(--panel2); color:var(--fg);
@@ -466,6 +478,12 @@
           <input type="number" id="sec_title_scale" min="50" max="300" step="1" placeholder="100" />
         </div>
       </div>
+      <label>제목 색상</label>
+      <div class="color-row" data-target="sec_title_color">
+        <input type="color" data-color-pick value="#111111" />
+        <input type="text" id="sec_title_color" data-color-text placeholder="비우면 기본 (예: #111111)" />
+        <button type="button" data-color-clear>✕</button>
+      </div>
       <div class="grid-2" style="margin-top:6px;">
         <div>
           <label>부제 폰트</label>
@@ -476,6 +494,12 @@
           <input type="number" id="sec_subtitle_scale" min="50" max="300" step="1" placeholder="100" />
         </div>
       </div>
+      <label>부제 색상</label>
+      <div class="color-row" data-target="sec_subtitle_color">
+        <input type="color" data-color-pick value="#111111" />
+        <input type="text" id="sec_subtitle_color" data-color-text placeholder="비우면 기본 (예: #ff3b30)" />
+        <button type="button" data-color-clear>✕</button>
+      </div>
       <div class="grid-2" style="margin-top:6px;">
         <div>
           <label>본문 폰트</label>
@@ -485,6 +509,12 @@
           <label>본문 크기 (%)</label>
           <input type="number" id="sec_body_scale" min="50" max="300" step="1" placeholder="100" />
         </div>
+      </div>
+      <label>본문 색상</label>
+      <div class="color-row" data-target="sec_body_color">
+        <input type="color" data-color-pick value="#111111" />
+        <input type="text" id="sec_body_color" data-color-text placeholder="비우면 기본 (예: #1a1a1a)" />
+        <button type="button" data-color-clear>✕</button>
       </div>
     </div>
 
@@ -668,6 +698,27 @@ function populateFontSelect(selectEl) {
   selectEl.dataset.populated = '1';
 }
 document.querySelectorAll('select.font-pick').forEach(populateFontSelect);
+
+// 색상 입력 sync (color picker ↔ hex 텍스트, 비우기 버튼)
+document.querySelectorAll('.color-row').forEach(row => {
+  const pick = row.querySelector('input[type="color"]');
+  const text = row.querySelector('input[data-color-text]');
+  const clr  = row.querySelector('button[data-color-clear]');
+  if (pick) pick.addEventListener('input', () => { text.value = pick.value; });
+  if (text) text.addEventListener('input', () => {
+    if (/^#[0-9a-fA-F]{3,8}$/.test(text.value.trim())) pick.value = text.value.trim();
+  });
+  if (clr) clr.addEventListener('click', () => { text.value = ''; pick.value = '#111111'; });
+});
+function setColorRow(textId, value) {
+  const text = document.getElementById(textId);
+  if (!text) return;
+  const row = text.closest('.color-row');
+  const pick = row && row.querySelector('input[type="color"]');
+  const valid = (typeof value === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(value.trim())) ? value.trim() : '';
+  text.value = valid;
+  if (pick) pick.value = valid || '#111111';
+}
 
 // ================== 로그인 (비밀번호-only) ==================
 const ADMIN_PW = 'bold2016';
@@ -968,6 +1019,9 @@ async function openSectionModal(id) {
     $('#sec_subtitle_scale').value = scaleToPct(ex.subtitle_scale);
     $('#sec_body_font').value      = ex.body_font      || '';
     $('#sec_body_scale').value     = scaleToPct(ex.body_scale);
+    setColorRow('sec_title_color',    ex.title_color);
+    setColorRow('sec_subtitle_color', ex.subtitle_color);
+    setColorRow('sec_body_color',     ex.body_color);
     $('#sec_video_url').value      = ex.video_url      || '';
     $('#btnDeleteSection').classList.remove('hidden');
     refreshImagePreview('#sec_image_url', '#sec_image_preview');
@@ -980,6 +1034,7 @@ async function openSectionModal(id) {
     $('#sec_type').value = 'text';
     $('#sec_is_visible').value = 'true';
     ['title_font','title_scale','subtitle_font','subtitle_scale','body_font','body_scale'].forEach(k => $(`#sec_${k}`).value = '');
+    ['sec_title_color','sec_subtitle_color','sec_body_color'].forEach(id => setColorRow(id, ''));
     $('#btnDeleteSection').classList.add('hidden');
     refreshImagePreview('#sec_image_url', '#sec_image_preview');
     $('#itemsEditor').classList.add('hidden');
@@ -1057,19 +1112,29 @@ $('#btnSaveSection').onclick = async () => {
     const clamped = Math.min(300, Math.max(50, n));
     return Math.round(clamped) / 100;
   };
-  const tFont   = $('#sec_title_font').value;
-  const tScale  = pctToScale($('#sec_title_scale').value);
-  const stFont  = $('#sec_subtitle_font').value;
-  const stScale = pctToScale($('#sec_subtitle_scale').value);
-  const bFont   = $('#sec_body_font').value;
-  const bScale  = pctToScale($('#sec_body_scale').value);
-  const vUrl    = ($('#sec_video_url').value || '').trim();
+  const validHex = (raw) => {
+    const v = String(raw || '').trim();
+    return /^#[0-9a-fA-F]{3,8}$/.test(v) ? v : '';
+  };
+  const tFont    = $('#sec_title_font').value;
+  const tScale   = pctToScale($('#sec_title_scale').value);
+  const tColor   = validHex($('#sec_title_color').value);
+  const stFont   = $('#sec_subtitle_font').value;
+  const stScale  = pctToScale($('#sec_subtitle_scale').value);
+  const stColor  = validHex($('#sec_subtitle_color').value);
+  const bFont    = $('#sec_body_font').value;
+  const bScale   = pctToScale($('#sec_body_scale').value);
+  const bColor   = validHex($('#sec_body_color').value);
+  const vUrl     = ($('#sec_video_url').value || '').trim();
   if (tFont)   baseExtra.title_font = tFont;        else delete baseExtra.title_font;
   if (tScale)  baseExtra.title_scale = tScale;      else delete baseExtra.title_scale;
+  if (tColor)  baseExtra.title_color = tColor;      else delete baseExtra.title_color;
   if (stFont)  baseExtra.subtitle_font = stFont;    else delete baseExtra.subtitle_font;
   if (stScale) baseExtra.subtitle_scale = stScale;  else delete baseExtra.subtitle_scale;
+  if (stColor) baseExtra.subtitle_color = stColor;  else delete baseExtra.subtitle_color;
   if (bFont)   baseExtra.body_font = bFont;         else delete baseExtra.body_font;
   if (bScale)  baseExtra.body_scale = bScale;       else delete baseExtra.body_scale;
+  if (bColor)  baseExtra.body_color = bColor;       else delete baseExtra.body_color;
   if (vUrl)    baseExtra.video_url = vUrl;          else delete baseExtra.video_url;
   const payload = {
     slug: ($('#sec_slug').value || '').trim() || 'section-'+Date.now(),
