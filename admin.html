@@ -1065,7 +1065,7 @@ function refreshImagePreview(inputSel, previewSel) {
 
 // ================== 이미지 업로드 (Supabase Storage) ==================
 const STORAGE_BUCKET = 'bold-media';
-const MAX_UPLOAD_MB = 50;
+const MAX_UPLOAD_MB = 100;
 
 async function uploadImage(file, folder) {
   const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
