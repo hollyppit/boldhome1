@@ -342,6 +342,108 @@
   }
   .btn-bold:hover { background:#fff; color:var(--fg); }
 
+  /* 비밀 문의 게시판 (CTA 섹션 내부) */
+  .iq-board {
+    max-width: 760px;
+    margin: 100px auto 0;
+    text-align: left;
+    color: #fff;
+  }
+  .iq-board-title {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+    text-align: center;
+    opacity: .9;
+  }
+  .iq-board-help {
+    font-family: var(--serif);
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: .55;
+    margin: 0 0 22px;
+    text-align: center;
+  }
+  .iq-board-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid rgba(255,255,255,.18);
+  }
+  .iq-board-list li { border-bottom: 1px solid rgba(255,255,255,.12); }
+  .iq-board-row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 60px 1fr auto auto;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 6px;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--serif);
+    font-size: 14px;
+    transition: background .15s;
+  }
+  .iq-board-row:hover { background: rgba(255,255,255,.05); }
+  .iq-board-num {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .15em;
+    opacity: .55;
+  }
+  .iq-board-label {
+    font-family: var(--serif);
+    font-size: 14px;
+    opacity: .9;
+  }
+  .iq-board-date {
+    font-family: var(--display);
+    font-size: 11px;
+    letter-spacing: .1em;
+    opacity: .55;
+    white-space: nowrap;
+  }
+  .iq-board-status {
+    font-family: var(--display);
+    font-size: 10px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 999px;
+    opacity: .75;
+    white-space: nowrap;
+  }
+  .iq-board-status.on {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(255,255,255,.5);
+    opacity: 1;
+  }
+  .iq-board-empty {
+    font-family: var(--serif);
+    font-size: 14px;
+    text-align: center;
+    padding: 40px 0;
+    opacity: .5;
+    list-style: none;
+  }
+  @media (max-width: 600px) {
+    .iq-board { margin-top: 60px; }
+    .iq-board-row {
+      grid-template-columns: 44px 1fr auto;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .iq-board-status { display: none; }
+  }
+
   /* 푸터 */
   footer {
     padding: 70px 28px 40px;
@@ -882,6 +984,14 @@
       iq_back: '뒤로',
       iq_save: '저장',
       iq_delete: '삭제',
+      iq_board_title: '비밀 문의 게시판',
+      iq_board_help: '문의를 클릭하고 본인이 설정한 비밀번호를 입력하면 본인 글만 확인·수정할 수 있어요.',
+      iq_board_empty: '아직 등록된 문의가 없습니다.',
+      iq_board_loading: '불러오는 중…',
+      iq_board_fail: '목록을 불러오지 못했습니다.',
+      iq_locked: '🔒 비밀글',
+      iq_status_pending: '답변 대기',
+      iq_status_read: '관리자 확인',
     },
     en: {
       lang_toggle: '🌐 한국어',
@@ -950,6 +1060,14 @@
       iq_back: 'Back',
       iq_save: 'Save',
       iq_delete: 'Delete',
+      iq_board_title: 'Private Inquiry Board',
+      iq_board_help: 'Click an entry and enter the password you set to view your own post.',
+      iq_board_empty: 'No inquiries have been registered yet.',
+      iq_board_loading: 'Loading…',
+      iq_board_fail: 'Failed to load the list.',
+      iq_locked: '🔒 Private',
+      iq_status_pending: 'Pending',
+      iq_status_read: 'Reviewed',
     },
   };
   function t(key) { return I18N[CURRENT_LANG][key] ?? I18N.ko[key] ?? key; }
@@ -1458,6 +1576,14 @@
         const ctaButton = isContact
           ? `<button class="btn-bold reveal" type="button" data-open-inquiry="1">${escape(contactLabel)}</button>`
           : (s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(rawLabel || t('get_in_touch'))}</a>` : '');
+        const boardBlock = isContact ? `
+          <div class="iq-board reveal" data-iq-board="1">
+            <h3 class="iq-board-title">${escape(t('iq_board_title'))}</h3>
+            <p class="iq-board-help">${escape(t('iq_board_help'))}</p>
+            <ul class="iq-board-list" id="iqBoardList">
+              <li class="iq-board-empty">${escape(t('iq_board_loading'))}</li>
+            </ul>
+          </div>` : '';
         return `
         <section ${anchor} class="cta"${typoStyle ? ` style="${typoStyle}"` : ''}>
           ${editHint}
@@ -1468,6 +1594,7 @@
           <p class="cta-text reveal">${nl2br(escape(sBody||''))}</p>
           ${videoBlock}
           ${ctaButton}
+          ${boardBlock}
         </section>`;
       }
 
@@ -1575,6 +1702,32 @@
     initSlideshows(SECTIONS_CACHE);
     bindEditHints();
     applyStaticI18n();
+    loadInquiryBoard();
+  }
+
+  async function loadInquiryBoard() {
+    const list = document.getElementById('iqBoardList');
+    if (!list || !useSupabase) return;
+    try {
+      const { data, error } = await supabase.rpc('list_inquiries_public');
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        list.innerHTML = `<li class="iq-board-empty">${escape(t('iq_board_empty'))}</li>`;
+        return;
+      }
+      list.innerHTML = data.map(row => `
+        <li>
+          <button class="iq-board-row" type="button" data-open-inquiry="lookup" data-iq-prefill-id="${row.id}">
+            <span class="iq-board-num">#${row.id}</span>
+            <span class="iq-board-label">${escape(t('iq_locked'))}</span>
+            <span class="iq-board-date">${formatDate(row.created_at)}</span>
+            <span class="iq-board-status ${row.is_read ? 'on' : ''}">${escape(t(row.is_read ? 'iq_status_read' : 'iq_status_pending'))}</span>
+          </button>
+        </li>`).join('');
+    } catch (err) {
+      console.warn('inquiry board load failed:', err);
+      list.innerHTML = `<li class="iq-board-empty">${escape(t('iq_board_fail'))}</li>`;
+    }
   }
 
   function bindEditHints() {
@@ -1613,6 +1766,7 @@
     applyStaticI18n();
     initAdminMode();
     initInquiryModal();
+    loadInquiryBoard();
   } catch (e) {
     console.error(e);
     $('#main').innerHTML = `<div class="empty-note">${escape(t('load_failed'))}</div>`;
@@ -2043,6 +2197,11 @@
         e.preventDefault();
         const tab = trigger.dataset.openInquiry === 'lookup' ? 'lookup' : 'write';
         openIq(tab);
+        const prefillId = trigger.dataset.iqPrefillId;
+        if (prefillId && tab === 'lookup') {
+          const idEl = $('#iqLkId'); if (idEl) idEl.value = prefillId;
+          setTimeout(() => $('#iqLkPw')?.focus(), 50);
+        }
       }
     });
     tabs.forEach(t => t.onclick = () => switchTab(t.dataset.iqTab));

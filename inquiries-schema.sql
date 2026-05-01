@@ -207,7 +207,23 @@ end;
 $$;
 
 -- ─────────────────────────────────────────────────────────────────────
--- 10) [관리자] 비밀번호 변경 (필요 시 사용)
+-- 10) [공개] 비밀 문의 목록 (제목·내용·연락처 비공개, ID/일시/읽음여부만)
+--     사용자가 본인이 등록한 글이 게시판에 들어왔는지 시각적으로 확인하기 위함.
+-- ─────────────────────────────────────────────────────────────────────
+create or replace function list_inquiries_public()
+returns table (
+  id bigint, is_read boolean, created_at timestamptz
+)
+language sql security definer set search_path = public, extensions
+as $$
+  select i.id, i.is_read, i.created_at
+  from inquiries i
+  order by i.created_at desc
+  limit 200;
+$$;
+
+-- ─────────────────────────────────────────────────────────────────────
+-- 11) [관리자] 비밀번호 변경 (필요 시 사용)
 -- ─────────────────────────────────────────────────────────────────────
 create or replace function change_admin_pw(p_old_pw text, p_new_pw text)
 returns boolean
@@ -236,6 +252,7 @@ grant execute on function verify_inquiry(bigint, text)                       to 
 grant execute on function update_inquiry_by_user(bigint, text, text, text, text) to anon, authenticated;
 grant execute on function delete_inquiry_by_user(bigint, text)               to anon, authenticated;
 grant execute on function list_inquiries(text)                               to anon, authenticated;
+grant execute on function list_inquiries_public()                            to anon, authenticated;
 grant execute on function mark_inquiry_read(text, bigint, boolean)           to anon, authenticated;
 grant execute on function delete_inquiry(text, bigint)                       to anon, authenticated;
 grant execute on function change_admin_pw(text, text)                        to anon, authenticated;
