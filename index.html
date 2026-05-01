@@ -1855,7 +1855,7 @@
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { iemToast('이미지 파일만 가능합니다','err'); e.target.value=''; return; }
-    if (file.size > 5 * 1024 * 1024) { iemToast('5MB를 초과합니다','err'); e.target.value=''; return; }
+    if (file.size > 50 * 1024 * 1024) { iemToast('50MB를 초과합니다','err'); e.target.value=''; return; }
     iemToast('업로드 중...');
     try {
       const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g,'') || 'bin';
