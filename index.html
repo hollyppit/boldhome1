@@ -1453,10 +1453,8 @@
 
       case 'cta': {
         const isContact = (s.slug || '').toLowerCase() === 'contact';
-        // 레거시 라벨('이메일 보내기' / 'mailto:...') 자동 정규화 → '문의하기'
         const rawLabel = (sLinkLbl || '').trim();
-        const isLegacyMailLabel = !rawLabel || rawLabel === '이메일 보내기' || rawLabel === '문의 남기기' || /^mailto:/i.test(rawLabel);
-        const contactLabel = isLegacyMailLabel ? t('inquiry_btn') : rawLabel;
+        const contactLabel = rawLabel || t('inquiry_btn');
         const ctaButton = isContact
           ? `<button class="btn-bold reveal" type="button" data-open-inquiry="1">${escape(contactLabel)}</button>`
           : (s.link_url ? `<a class="btn-bold reveal" href="${s.link_url}">${escape(rawLabel || t('get_in_touch'))}</a>` : '');
